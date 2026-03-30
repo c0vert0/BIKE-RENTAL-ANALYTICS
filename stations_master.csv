@@ -1,0 +1,101 @@
+station_id,station_name,latitude,longitude,capacity,neighborhood,city_zone,install_date,status
+S1,Station_1,999.0,78.412426,-5,Port Danielview,C,2003-04-25,inactive
+S2,Station_2,17.327511,78.624944,35,New Chrisview,B,2018-06-18,active
+S3,Station_3,17.320487,78.685605,37,West Gregoryhaven,C,2011-06-30,active
+S4,Station_4,17.486143,78.589055,5,Sarahchester,C,2023-07-18,active
+S5,Station_5,17.573119,78.451844,27,Michaelside,B,2011-11-17,active
+S6,Station_6,17.371874,78.357447,45,Danielstad,C,1993-07-07,inactive
+S7,Station_7,17.43824,78.382671,7,South Lawrence,A,2008-03-19,inactive
+S8,Station_8,17.487938,78.552125,26,Jonesborough,B,2012-03-21,active
+S9,Station_9,17.525156,78.388446,9,South Michellechester,B,2019-08-01,inactive
+S10,Station_10,17.386466,78.462229,36,New Michaelshire,A,1990-03-22,inactive
+S11,Station_11,17.555297,78.458643,39,Joneshaven,C,1972-04-24,inactive
+S12,Station_12,17.352487,78.559654,16,West Debbieburgh,A,2000-03-31,inactive
+S13,Station_13,17.206376,78.372884,9,Simsborough,C,2013-03-09,inactive
+S14,Station_14,17.449064,78.637913,20,North Kristy,B,1971-05-25,inactive
+S15,Station_15,17.471813,78.648027,8,Richardland,C,2011-01-01,inactive
+S16,Station_16,999.0,78.666638,22,Billychester,A,2019-09-03,active
+S17,Station_17,17.576285,78.344505,7,New Maria,A,2025-02-15,inactive
+S18,Station_18,17.27562,78.577268,36,New Michaelfort,C,2004-03-04,inactive
+S19,Station_19,17.538421,78.502266,29,North Edward,A,1974-09-10,inactive
+S20,Station_20,17.348635,78.626154,22,Jayfort,C,1972-11-02,active
+S21,Station_21,17.512768,78.391265,-5,Lake Brettstad,B,1983-02-18,active
+S22,Station_22,17.293757,78.625337,12,East Kennethborough,A,1989-12-29,inactive
+S23,Station_23,17.304204,78.382101,23,East Amanda,B,2018-02-08,active
+S24,Station_24,17.264692,78.300733,19,Collierville,C,2005-06-27,inactive
+S25,Station_25,17.449314,78.594873,22,Caseside,C,1998-05-30,inactive
+S26,Station_26,17.370873,78.661666,38,Johnsonhaven,C,1992-01-21,active
+S27,Station_27,17.543462,78.693487,47,East Paulshire,B,2019-04-14,active
+S28,Station_28,17.262364,78.356336,47,Markshire,B,1970-08-06,inactive
+S29,Station_29,17.300213,78.468173,23,Michelechester,B,1985-12-07,active
+S30,Station_30,17.583132,78.401803,39,Shawside,A,2022-09-01,active
+S31,Station_31,999.0,78.303383,5,East Heidi,B,1979-10-31,active
+S32,Station_32,17.395796,78.565235,43,East Erikamouth,A,1983-06-01,active
+S33,Station_33,17.338769,78.691431,32,Robertsonton,C,2005-03-20,inactive
+S34,Station_34,17.312272,78.505949,7,East George,C,2007-11-07,active
+S35,Station_35,17.382933,78.31699,18,Davilachester,C,2011-11-24,active
+S36,Station_36,17.242291,78.443207,49,Lisamouth,A,1997-05-11,inactive
+S37,Station_37,17.391372,78.36579,25,East Kathryn,C,1995-10-17,inactive
+S38,Station_38,17.554694,78.612426,27,South Teresatown,B,2025-08-19,inactive
+S39,Station_39,17.468199,78.520661,46,Wilsonberg,B,2022-08-17,inactive
+S40,Station_40,17.209818,78.509173,6,Allisonchester,C,1992-05-02,inactive
+S41,Station_41,17.281968,78.402712,-5,Williamsfurt,C,1981-08-02,active
+S42,Station_42,17.222845,78.419814,8,North Annette,A,1983-04-02,inactive
+S43,Station_43,17.517862,78.461814,17,Port Tracyborough,A,1994-11-03,active
+S44,Station_44,17.484521,78.638806,22,New Sherry,A,1984-09-17,active
+S45,Station_45,17.218173,78.564726,43,New Tiffany,B,2021-12-25,active
+S46,Station_46,999.0,78.554068,42,South Edwinville,B,1986-11-28,inactive
+S47,Station_47,17.398234,78.634154,40,New Lindsay,C,2004-04-05,inactive
+S48,Station_48,17.274236,78.573463,41,Pattersonchester,C,1980-06-21,inactive
+S49,Station_49,17.403391,78.682454,49,Villaview,C,1984-01-17,inactive
+S50,Station_50,17.379692,78.581686,10,Port Christopherside,A,1996-02-19,inactive
+S51,Station_51,17.463364,78.37354,22,North Brandon,B,1990-12-12,active
+S52,Station_52,17.220929,78.674417,50,Westport,B,1977-07-30,active
+S53,Station_53,17.32064,78.519255,41,Lake Andrew,B,2023-09-22,active
+S54,Station_54,17.505936,78.445919,5,South Mikayla,C,2023-04-24,active
+S55,Station_55,17.407166,78.445736,35,Brandyside,A,1981-09-14,active
+S56,Station_56,17.396158,78.478456,28,North Nicoleburgh,C,2001-11-22,inactive
+S57,Station_57,17.347221,78.526962,41,Guzmanview,B,1995-12-26,active
+S58,Station_58,17.387916,78.62243,43,Lake Davidport,C,1975-09-14,active
+S59,Station_59,17.309339,78.498791,5,Stoutside,A,2017-06-10,active
+S60,Station_60,17.408761,78.541081,10,Reneeburgh,B,2009-05-16,active
+S61,Station_61,999.0,78.400106,-5,North Lisa,A,2002-12-19,inactive
+S62,Station_62,17.373229,78.447193,20,North Joseph,C,1991-06-18,inactive
+S63,Station_63,17.46411,78.602799,21,Philipton,A,1983-06-22,active
+S64,Station_64,17.429161,78.604255,14,Bennettmouth,A,2022-12-19,inactive
+S65,Station_65,17.303642,78.688454,6,Williamston,C,1982-05-19,active
+S66,Station_66,17.491287,78.547399,34,Loriside,C,1979-07-02,inactive
+S67,Station_67,17.327572,78.365081,24,South Savannah,C,1999-08-18,active
+S68,Station_68,17.596332,78.416256,9,Brittanytown,B,2020-12-07,active
+S69,Station_69,17.599901,78.677144,11,Hillshire,A,1982-07-17,inactive
+S70,Station_70,17.298397,78.337638,40,Port Nicholasstad,C,2013-04-17,inactive
+S71,Station_71,17.432006,78.676984,42,Palmertown,C,2009-12-08,inactive
+S72,Station_72,17.354533,78.527449,31,Elizabethburgh,A,1998-11-06,active
+S73,Station_73,17.357983,78.584113,42,East Kirstenfurt,B,2021-10-28,active
+S74,Station_74,17.204435,78.512383,36,Stephenstad,A,2018-02-06,active
+S75,Station_75,17.338909,78.6199,33,Morganton,A,2006-09-11,active
+S76,Station_76,999.0,78.550108,10,South Jessicaport,B,1972-01-13,active
+S77,Station_77,17.363638,78.405803,31,Brittanyborough,B,1990-08-23,active
+S78,Station_78,17.205977,78.306232,32,Debbietown,C,1999-01-08,active
+S79,Station_79,17.51866,78.452759,22,Danielmouth,B,2007-12-24,inactive
+S80,Station_80,17.224565,78.603964,35,Fordborough,B,2009-11-26,inactive
+S81,Station_81,17.20292,78.655901,-5,North Scottland,B,2022-03-01,inactive
+S82,Station_82,17.52296,78.681628,9,Moralesmouth,A,1970-12-04,active
+S83,Station_83,17.45459,78.62391,20,New Judytown,C,1989-05-28,inactive
+S84,Station_84,17.589998,78.362933,38,Carolchester,B,1996-05-15,inactive
+S85,Station_85,17.234455,78.393751,14,Tracyside,C,1993-02-06,inactive
+S86,Station_86,17.596538,78.678199,17,Hernandezshire,A,2014-10-02,inactive
+S87,Station_87,17.368322,78.467749,12,South Johnburgh,B,1999-09-13,inactive
+S88,Station_88,17.544272,78.379367,43,Lake Johnton,C,2004-06-29,active
+S89,Station_89,17.210636,78.690403,39,Port Joshua,C,2003-05-10,inactive
+S90,Station_90,17.481749,78.427147,41,South Steven,C,1974-02-09,inactive
+S91,Station_91,999.0,78.572103,34,Harrisberg,B,1977-12-25,active
+S92,Station_92,17.464712,78.466583,21,Timothyborough,C,1976-12-28,active
+S93,Station_93,17.477566,78.348223,30,East Jessicaburgh,B,1972-11-21,inactive
+S94,Station_94,17.34075,78.613817,13,South Cassandraside,C,2016-02-04,inactive
+S95,Station_95,17.35922,78.661401,16,Vaughnfurt,A,1991-06-08,active
+S96,Station_96,17.362307,78.541165,36,Port Brian,A,1999-08-21,active
+S97,Station_97,17.234453,78.326412,16,East Lauramouth,C,1991-08-24,inactive
+S98,Station_98,17.485394,78.381693,35,North Ashleyshire,A,1975-07-12,active
+S99,Station_99,17.373185,78.492128,13,Deannaport,C,1984-05-01,inactive
+S100,Station_100,17.422757,78.672582,42,Crystalshire,A,2018-10-31,inactive

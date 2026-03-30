@@ -1,0 +1,101 @@
+user_id,customer_name,dob,gender,email,phone,address,city,state,region,kyc_status,registration_date,is_student,corporate_id
+USR00001,Rohan Agarwal,1997-07-31,M,rohan.agarwal1@example.com,+918683446724,"34, MG Road",Hyderabad,Telangana,South,verified,2024-01-20,0,CORP003
+USR00002,Ananya Bose,1987-10-26,F,ananya.bose2@example.com,+919943832590,"135, MG Road",Hyderabad,Telangana,South,verified,2022-07-03,0,CORP003
+USR00003,Harsh Das,1992-04-20,M,harsh.das3@example.com,+918467729242,"197, Church Street",Hyderabad,Telangana,South,failed,2024-01-16,0,
+USR00004,Arjun Joshi,1979-09-06,M,arjun.joshi4@example.com,+919261436148,"10, Residency Road",Hyderabad,Telangana,South,pending,2022-04-11,0,CORP002
+USR00005,Nitin Kaur,1979-06-17,F,nitin.kaur5@example.com,+919683239935,"43, Church Street",Mumbai,Maharashtra,West,pending,2022-10-18,0,
+USR00006,Priya Das,1987-05-25,F,priya.das6@example.com,+918928130926,"60, Brigade Road",Mumbai,Maharashtra,West,verified,2025-03-12,0,CORP002
+USR00007,Ananya Chopra,2005-10-04,F,ananya.chopra7@example.com,+919159967797,"136, Church Street",Hyderabad,Telangana,South,pending,2025-02-28,0,
+USR00008,Divya Iyer,2002-04-06,F,divya.iyer8@example.com,+917440619526,"183, MG Road",Hyderabad,Telangana,South,verified,2021-11-10,0,CORP004
+USR00009,Ananya Kumar,2000-12-18,M,ananya.kumar9@example.com,+917953645978,"116, Residency Road",Chennai,Tamil Nadu,South,verified,2025-10-12,1,
+USR00010,Geeta Sharma,1989-02-12,M,geeta.sharma10@example.com,+917350492684,"96, Brigade Road",Pune,Maharashtra,West,verified,2024-08-05,0,
+USR00011,Aarav Rao,2006-09-02,M,aarav.rao11@example.com,+919029178475,"179, Brigade Road",Hyderabad,Telangana,South,verified,2022-08-28,1,
+USR00012,Rahul Chopra,1990-04-07,F,rahul.chopra12@example.com,+917642181881,"141, Church Street",Bengaluru,Karnataka,South,verified,2021-07-30,0,
+USR00013,Sneha Mehta,1983-02-01,M,sneha.mehta13@example.com,+919674951016,"118, MG Road",Bengaluru,Karnataka,South,verified,2023-06-11,0,CORP001
+USR00014,Sneha Chopra,1995-04-22,F,sneha.chopra14@example.com,+918843567009,"1, Residency Road",Pune,Maharashtra,West,verified,2023-06-22,0,CORP003
+USR00015,Pooja Agarwal,1989-03-04,M,pooja.agarwal15@example.com,+919259408103,"140, MG Road",Bengaluru,Karnataka,South,verified,2025-11-13,0,
+USR00016,Suresh Chopra,1976-06-25,F,suresh.chopra16@example.com,+917290166087,"89, Brigade Road",Hyderabad,Telangana,South,verified,2023-07-29,0,CORP003
+USR00017,Swati Singh,2001-04-01,F,swati.singh17@example.com,+919760786161,"45, Church Street",Hyderabad,Telangana,South,verified,2022-07-20,1,
+USR00018,Varun Chopra,1996-06-29,M,varun.chopra18@example.com,+918965718821,"10, Residency Road",Mumbai,Maharashtra,West,pending,2021-12-14,0,CORP003
+USR00019,Arjun Patel,2001-12-01,M,arjun.patel19@example.com,+919332299081,"122, Residency Road",Bengaluru,Karnataka,South,verified,2024-02-06,0,CORP002
+USR00020,Priya Iyer,1984-09-25,M,priya.iyer20@example.com,+918580630311,"112, Church Street",Bengaluru,Karnataka,South,verified,2024-03-28,0,
+USR00021,Swati Pillai,2005-06-10,F,swati.pillai21@example.com,+919230272804,"69, MG Road",Hyderabad,Telangana,South,verified,2023-01-02,0,CORP001
+USR00022,Swati Das,1977-09-07,M,swati.das22@example.com,+918408405265,"170, Residency Road",Mumbai,Maharashtra,West,verified,2023-11-30,0,
+USR00023,Ananya Pillai,1995-07-04,F,ananya.pillai23@example.com,+918514230707,"158, Church Street",Mumbai,Maharashtra,West,verified,2025-03-11,0,
+USR00024,Kiran Patel,1977-07-21,F,kiran.patel24@example.com,+919918046336,"41, MG Road",Chennai,Tamil Nadu,South,pending,2024-07-03,0,CORP002
+USR00025,Vikram Kaur,1998-01-26,F,vikram.kaur25@example.com,+919770953471,"94, Residency Road",Bengaluru,Karnataka,South,verified,2022-06-28,0,
+USR00026,Suresh Agarwal,1976-02-07,F,suresh.agarwal26@example.com,+917330220406,"147, Brigade Road",Chennai,Tamil Nadu,South,verified,2024-07-27,0,
+USR00027,Amit Shah,1988-07-17,M,amit.shah27@example.com,+917799070274,"128, Church Street",Hyderabad,Telangana,South,verified,2023-07-16,0,
+USR00028,Geeta Bose,1979-01-03,M,geeta.bose28@example.com,+918226543337,"178, Church Street",Hyderabad,Telangana,South,failed,2025-03-18,0,
+USR00029,Arjun Singh,1979-08-14,F,arjun.singh29@example.com,+917377058351,"175, Residency Road",Chennai,Tamil Nadu,South,verified,2022-11-19,0,CORP003
+USR00030,Neha Shah,1999-02-21,M,neha.shah30@example.com,+919738900744,"45, Residency Road",Pune,Maharashtra,West,pending,2023-11-20,0,
+USR00031,Amit Joshi,1979-02-17,Other,amit.joshi31@example.com,+918550038771,"142, Residency Road",Mumbai,Maharashtra,West,verified,2023-06-06,0,CORP004
+USR00032,Dev Bose,1979-06-01,F,dev.bose32@example.com,+919055850987,"135, Church Street",Bengaluru,Karnataka,South,verified,2021-12-22,0,
+USR00033,Rahul Das,2003-01-06,F,rahul.das33@example.com,+919222044336,"89, Brigade Road",Mumbai,Maharashtra,West,verified,2024-02-10,0,CORP001
+USR00034,Nitin Bose,1996-10-08,F,nitin.bose34@example.com,+917237996376,"32, Brigade Road",Mumbai,Maharashtra,West,pending,2025-02-04,0,CORP002
+USR00035,Ananya Nair,1980-07-05,M,ananya.nair35@example.com,+917338700713,"65, Brigade Road",Mumbai,Maharashtra,West,pending,2024-05-11,0,CORP002
+USR00036,Harsh Bose,1984-05-03,M,harsh.bose36@example.com,+917724285673,"152, Brigade Road",Hyderabad,Telangana,South,verified,2025-12-14,0,
+USR00037,Divya Kaur,1999-07-09,F,divya.kaur37@example.com,+917348849508,"12, Residency Road",Hyderabad,Telangana,South,pending,2021-10-06,0,CORP004
+USR00038,Harsh Iyer,2001-02-04,F,harsh.iyer38@example.com,+919756970807,"78, Church Street",Pune,Maharashtra,West,verified,2021-09-03,0,CORP003
+USR00039,Pooja Verma,1985-02-13,M,pooja.verma39@example.com,+918994763896,"53, Residency Road",Bengaluru,Karnataka,South,verified,2022-10-05,0,CORP001
+USR00040,Riya Reddy,1985-08-20,F,riya.reddy40@example.com,+918591458030,"132, MG Road",Hyderabad,Telangana,South,verified,2024-05-09,0,CORP001
+USR00041,Raj Joshi,1990-11-15,M,raj.joshi41@example.com,+918246451043,"99, Church Street",Chennai,Tamil Nadu,South,verified,2023-07-11,0,
+USR00042,Pooja Nair,2002-09-05,M,pooja.nair42@example.com,+919210726347,"120, Church Street",Pune,Maharashtra,West,verified,2024-01-28,1,
+USR00043,Nitin Mehta,1991-12-04,M,nitin.mehta43@example.com,+917924038246,"150, Residency Road",Chennai,Tamil Nadu,South,failed,2025-09-18,0,CORP001
+USR00044,Priya Patel,1984-07-28,F,priya.patel44@example.com,+917461696451,"111, Brigade Road",Chennai,Tamil Nadu,South,verified,2023-11-05,0,CORP002
+USR00045,Nitin Gupta,1999-10-03,M,nitin.gupta45@example.com,+919449341007,"144, Brigade Road",Chennai,Tamil Nadu,South,verified,2024-07-11,0,
+USR00046,Meera Bose,1984-10-26,M,meera.bose46@example.com,+919676802207,"175, MG Road",Pune,Maharashtra,West,verified,2025-03-31,0,CORP004
+USR00047,Vikram Singh,1988-05-27,M,vikram.singh47@example.com,+919587558681,"131, Church Street",Hyderabad,Telangana,South,verified,2024-07-10,0,CORP004
+USR00048,Amit Patel,1976-07-17,M,amit.patel48@example.com,+919603869092,"132, Brigade Road",Hyderabad,Telangana,South,verified,2025-06-11,0,CORP002
+USR00049,Raj Kaur,1985-11-02,M,raj.kaur49@example.com,+919189205388,"137, Church Street",Pune,Maharashtra,West,verified,2023-12-17,0,CORP002
+USR00050,Varun Agarwal,1985-03-14,M,varun.agarwal50@example.com,+918789026838,"150, Residency Road",Bengaluru,Karnataka,South,verified,2024-07-19,0,
+USR00051,Deepa Sharma,1995-04-24,M,deepa.sharma51@example.com,+919063511828,"44, Church Street",Pune,Maharashtra,West,verified,2023-05-08,0,CORP003
+USR00052,Vikram Joshi,1976-01-28,F,vikram.joshi52@example.com,+918798647685,"39, Church Street",Bengaluru,Karnataka,South,verified,2023-01-14,0,
+USR00053,Varun Iyer,1988-12-17,F,varun.iyer53@example.com,+917267496095,"181, Brigade Road",Pune,Maharashtra,West,pending,2025-06-05,0,CORP004
+USR00054,Amit Iyer,1994-01-31,M,amit.iyer54@example.com,+917743812855,"118, Residency Road",Chennai,Tamil Nadu,South,verified,2025-11-19,0,CORP001
+USR00055,Kavya Shah,1997-12-30,F,kavya.shah55@example.com,+918198323340,"143, Residency Road",Hyderabad,Telangana,South,failed,2025-07-14,0,
+USR00056,Pooja Mehta,2001-03-28,M,pooja.mehta56@example.com,+918174491176,"74, MG Road",Mumbai,Maharashtra,West,verified,2025-07-29,1,
+USR00057,Sanjay Bose,1987-12-02,F,sanjay.bose57@example.com,+918247484671,"11, Residency Road",Chennai,Tamil Nadu,South,pending,2024-05-08,0,CORP004
+USR00058,Varun Kumar,1986-10-14,F,varun.kumar58@example.com,+919313174562,"70, Residency Road",Hyderabad,Telangana,South,verified,2025-06-28,0,
+USR00059,Vikram Singh,1995-12-13,F,vikram.singh59@example.com,+919280805846,"58, Brigade Road",Mumbai,Maharashtra,West,verified,2023-06-24,0,
+USR00060,Priya Singh,1989-01-23,M,priya.singh60@example.com,+917022254113,"141, Brigade Road",Chennai,Tamil Nadu,South,pending,2022-04-09,0,CORP003
+USR00061,Lakshmi Chopra,1991-03-31,F,lakshmi.chopra61@example.com,+917384230848,"167, Brigade Road",Hyderabad,Telangana,South,verified,2024-02-23,0,
+USR00062,Kavya Patel,2006-01-27,F,kavya.patel62@example.com,+918705078697,"127, Brigade Road",Chennai,Tamil Nadu,South,failed,2022-11-29,0,
+USR00063,Geeta Mehta,2004-10-30,M,geeta.mehta63@example.com,+919754415831,"140, Church Street",Hyderabad,Telangana,South,verified,2022-04-30,0,
+USR00064,Nitin Reddy,2003-12-16,F,nitin.reddy64@example.com,+918971022633,"166, Residency Road",Hyderabad,Telangana,South,verified,2023-01-21,0,
+USR00065,Varun Nair,1975-06-25,F,varun.nair65@example.com,+919743306394,"104, Church Street",Hyderabad,Telangana,South,verified,2023-01-22,0,
+USR00066,Amit Rao,1977-12-13,M,amit.rao66@example.com,+918065354117,"2, Residency Road",Bengaluru,Karnataka,South,verified,2022-12-27,0,
+USR00067,Suresh Joshi,1990-03-14,F,suresh.joshi67@example.com,+917049116110,"67, Residency Road",Hyderabad,Telangana,South,verified,2023-12-26,0,CORP002
+USR00068,Varun Joshi,1977-02-11,F,varun.joshi68@example.com,+919158308965,"181, Residency Road",Chennai,Tamil Nadu,South,verified,2024-01-10,0,
+USR00069,Varun Singh,1996-09-24,F,varun.singh69@example.com,+917573673552,"123, Brigade Road",Hyderabad,Telangana,South,verified,2024-07-16,0,CORP002
+USR00070,Dev Kaur,1987-09-18,M,dev.kaur70@example.com,+919852263888,"56, Brigade Road",Pune,Maharashtra,West,verified,2025-06-02,0,CORP004
+USR00071,Neha Kaur,2004-09-15,F,neha.kaur71@example.com,+919423086220,"29, MG Road",Pune,Maharashtra,West,verified,2025-03-19,0,
+USR00072,Ajay Bose,2005-09-20,F,ajay.bose72@example.com,+919234849897,"114, MG Road",Pune,Maharashtra,West,verified,2025-12-24,1,
+USR00073,Neha Iyer,1999-05-24,F,neha.iyer73@example.com,+918947476917,"34, Church Street",Bengaluru,Karnataka,South,pending,2025-10-03,0,CORP001
+USR00074,Dev Agarwal,1976-12-18,F,dev.agarwal74@example.com,+917012951344,"191, Brigade Road",Hyderabad,Telangana,South,verified,2021-08-07,0,CORP001
+USR00075,Sanjay Kumar,1976-07-16,M,sanjay.kumar75@example.com,+919027530378,"9, Residency Road",Bengaluru,Karnataka,South,failed,2021-12-05,0,
+USR00076,Lakshmi Nair,2001-03-01,M,lakshmi.nair76@example.com,+918621334484,"97, MG Road",Chennai,Tamil Nadu,South,verified,2024-08-07,0,CORP001
+USR00077,Neha Bose,1979-07-11,F,neha.bose77@example.com,+918688173960,"136, Brigade Road",Hyderabad,Telangana,South,failed,2022-06-04,0,
+USR00078,Swati Joshi,2003-05-28,M,swati.joshi78@example.com,+919284637470,"98, Brigade Road",Bengaluru,Karnataka,South,verified,2023-12-14,0,CORP003
+USR00079,Pooja Pillai,1986-10-11,M,pooja.pillai79@example.com,+918800624665,"158, MG Road",Mumbai,Maharashtra,West,pending,2022-05-17,0,
+USR00080,Pooja Iyer,1977-04-16,M,pooja.iyer80@example.com,+917209063208,"63, MG Road",Bengaluru,Karnataka,South,verified,2025-03-19,0,CORP002
+USR00081,Suresh Pillai,1982-12-22,F,suresh.pillai81@example.com,+918005716063,"188, Residency Road",Bengaluru,Karnataka,South,failed,2022-08-10,0,CORP002
+USR00082,Sanjay Kaur,2001-04-14,F,sanjay.kaur82@example.com,+919835590759,"134, Brigade Road",Hyderabad,Telangana,South,verified,2023-06-07,1,
+USR00083,Lakshmi Mehta,1984-05-12,M,lakshmi.mehta83@example.com,+919387360437,"127, MG Road",Pune,Maharashtra,West,verified,2022-11-27,0,CORP003
+USR00084,Meera Verma,2001-09-26,F,meera.verma84@example.com,+919310384304,"122, Brigade Road",Chennai,Tamil Nadu,South,verified,2024-11-20,1,
+USR00085,Smita Joshi,1985-03-26,F,smita.joshi85@example.com,+918788887661,"143, Brigade Road",Mumbai,Maharashtra,West,verified,2025-05-09,0,
+USR00086,Suresh Joshi,1983-09-04,M,suresh.joshi86@example.com,+919300537106,"186, Brigade Road",Bengaluru,Karnataka,South,verified,2025-03-29,0,CORP004
+USR00087,Priya Gupta,1987-11-01,F,priya.gupta87@example.com,+919523652725,"186, Brigade Road",Pune,Maharashtra,West,verified,2021-10-01,0,CORP004
+USR00088,Nisha Iyer,2004-08-01,F,nisha.iyer88@example.com,+917503869216,"192, Church Street",Hyderabad,Telangana,South,verified,2021-07-18,1,
+USR00089,Geeta Joshi,1998-09-01,F,geeta.joshi89@example.com,+918215730003,"98, Church Street",Mumbai,Maharashtra,West,verified,2024-10-15,0,
+USR00090,Kavya Shah,1985-06-29,M,kavya.shah90@example.com,+919016446001,"195, Residency Road",Pune,Maharashtra,West,verified,2025-08-23,0,CORP001
+USR00091,Geeta Iyer,1987-08-12,M,geeta.iyer91@example.com,+918120016279,"142, Church Street",Bengaluru,Karnataka,South,verified,2023-04-19,0,CORP003
+USR00092,Ananya Reddy,1981-09-04,M,ananya.reddy92@example.com,+919941393812,"87, Residency Road",Chennai,Tamil Nadu,South,verified,2023-07-04,0,CORP001
+USR00093,Rahul Chopra,1999-08-15,F,rahul.chopra93@example.com,+918512585138,"44, Brigade Road",Chennai,Tamil Nadu,South,verified,2025-05-02,0,
+USR00094,Swati Bose,1991-08-13,M,swati.bose94@example.com,+917319246679,"172, MG Road",Pune,Maharashtra,West,verified,2021-11-30,0,CORP002
+USR00095,Rahul Sharma,1989-01-12,M,rahul.sharma95@example.com,+917939393836,"130, Church Street",Mumbai,Maharashtra,West,verified,2021-12-29,0,CORP003
+USR00096,Meera Patel,1996-01-09,F,meera.patel96@example.com,+917028399849,"137, Church Street",Pune,Maharashtra,West,verified,2025-07-11,0,CORP003
+USR00097,Aarav Sharma,1993-01-05,F,aarav.sharma97@example.com,+919997281896,"173, Church Street",Pune,Maharashtra,West,verified,2023-11-08,0,
+USR00098,Deepa Nair,1978-08-22,F,deepa.nair98@example.com,+919261111254,"65, Residency Road",Pune,Maharashtra,West,verified,2022-09-06,0,
+USR00099,Kiran Verma,1977-09-09,M,kiran.verma99@example.com,+919994607170,"58, Residency Road",Chennai,Tamil Nadu,South,verified,2025-04-27,0,CORP002
+USR00100,Neha Kumar,1997-03-30,Other,neha.kumar100@example.com,+919373834610,"122, MG Road",Bengaluru,Karnataka,South,verified,2022-03-18,0,CORP001

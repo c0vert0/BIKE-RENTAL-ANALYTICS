@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CityRide — Analytics Command Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --card: #111820;
+    --border: #1e2d3d;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #7fff6e;
+    --accent4: #ffcc00;
+    --warn: #ff3b5c;
+    --text: #e8f4fd;
+    --muted: #5a7a94;
+    --font-mono: 'Space Mono', monospace;
+    --font-display: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-display);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,229,255,0.03) 40px),
+                repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,229,255,0.03) 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 36px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(90deg, rgba(0,229,255,0.06) 0%, transparent 60%);
+  }
+
+  .logo-block { display: flex; align-items: center; gap: 14px; }
+  .logo-icon {
+    width: 40px; height: 40px;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-size: 20px;
+    box-shadow: 0 0 16px rgba(0,229,255,0.4);
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%,100% { box-shadow: 0 0 16px rgba(0,229,255,0.4); }
+    50% { box-shadow: 0 0 30px rgba(0,229,255,0.8); }
+  }
+
+  .logo-text { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo-text span { color: var(--accent); }
+  .logo-sub { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+  .header-meta { display: flex; align-items: center; gap: 24px; }
+  .live-badge {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent3);
+    letter-spacing: 1px;
+  }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent3); animation: blink 1.4s ease infinite; }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+
+  .timestamp { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+  /* ── NAV TABS ── */
+  nav {
+    position: relative; z-index: 10;
+    display: flex; gap: 4px;
+    padding: 14px 36px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 20px 12px;
+    cursor: pointer; border: none; background: transparent;
+    color: var(--muted); transition: all .2s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── MAIN CONTENT ── */
+  main { position: relative; z-index: 5; padding: 28px 36px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, border-color .2s;
+    cursor: default;
+  }
+  .kpi-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top:0; left:0; right:0; height:2px;
+    background: var(--card-accent, var(--accent));
+    box-shadow: 0 0 12px var(--card-accent, var(--accent));
+  }
+  .kpi-card.warn { --card-accent: var(--warn); }
+  .kpi-card.ok { --card-accent: var(--accent3); }
+  .kpi-card.gold { --card-accent: var(--accent4); }
+  .kpi-card.orange { --card-accent: var(--accent2); }
+
+  .kpi-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+  .kpi-value { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+  .kpi-value .unit { font-size: 16px; font-weight: 400; color: var(--muted); }
+  .kpi-delta { font-family: var(--font-mono); font-size: 11px; }
+  .kpi-delta.up { color: var(--accent3); }
+  .kpi-delta.down { color: var(--warn); }
+  .kpi-icon { position: absolute; right: 16px; top: 16px; font-size: 28px; opacity: .15; }
+
+  /* ── CHARTS GRID ── */
+  .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .charts-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+  }
+  .chart-title {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .chart-title .badge {
+    font-size: 9px; padding: 3px 8px; border-radius: 4px;
+    background: rgba(0,229,255,.1); color: var(--accent); border: 1px solid rgba(0,229,255,.3);
+  }
+  .chart-wrap { position: relative; }
+
+  /* ── TABLE ── */
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .table-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px;
+    color: var(--muted); text-transform: uppercase;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .filter-row { display: flex; gap: 10px; align-items: center; }
+  .filter-row select, .filter-row input {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; padding: 6px 12px;
+    font-family: var(--font-mono); font-size: 10px; outline: none;
+    transition: border-color .2s;
+  }
+  .filter-row select:focus, .filter-row input:focus { border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px;
+    color: var(--muted); text-transform: uppercase;
+    padding: 12px 16px; text-align: left;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  thead th:hover { color: var(--accent); }
+  tbody tr { border-bottom: 1px solid rgba(30,45,61,0.5); transition: background .15s; }
+  tbody tr:hover { background: rgba(0,229,255,0.04); }
+  tbody td { padding: 12px 16px; font-size: 13px; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 10px;
+  }
+  .tag-app { background: rgba(0,229,255,.1); color: var(--accent); }
+  .tag-kiosk { background: rgba(255,107,53,.1); color: var(--accent2); }
+  .tag-flagged { background: rgba(255,59,92,.15); color: var(--warn); }
+  .tag-ok { background: rgba(127,255,110,.1); color: var(--accent3); }
+  .tag-monthly { background: rgba(255,204,0,.1); color: var(--accent4); }
+  .tag-annual { background: rgba(127,255,110,.1); color: var(--accent3); }
+  .tag-payg { background: rgba(255,107,53,.1); color: var(--accent2); }
+  .tag-day_pass { background: rgba(0,229,255,.08); color: #88ccee; }
+
+  /* ── FLEET / MAINTENANCE TABLE ── */
+  .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; }
+  .dot-available { background: var(--accent3); }
+  .dot-in_use { background: var(--accent); }
+  .dot-maintenance { background: var(--warn); }
+  .dot-retired { background: var(--muted); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+
+  /* ── ZONE TABLE ── */
+  .zone-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 22px;
+  }
+  .zone-card {
+    border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center;
+    transition: border-color .2s;
+  }
+  .zone-card:hover { border-color: var(--accent); }
+  .zone-name { font-size: 22px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+  .zone-stat { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+  .zone-stat b { color: var(--text); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── ANOMALY PANEL ── */
+  .anomaly-list { padding: 0 22px 22px; }
+  .anomaly-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .anomaly-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .anomaly-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .anomaly-meta { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+  .severity { padding: 2px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 9px; font-weight: 700; }
+  .sev-high { background: rgba(255,59,92,.2); color: var(--warn); }
+  .sev-med { background: rgba(255,204,0,.2); color: var(--accent4); }
+
+  /* ── SUMMARY STATS ── */
+  .stat-row {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .stat-pill {
+    background: rgba(0,229,255,.07); border: 1px solid rgba(0,229,255,.2);
+    border-radius: 20px; padding: 4px 12px;
+    font-family: var(--font-mono); font-size: 10px; color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-block">
+    <div class="logo-icon">🚲</div>
+    <div>
+      <div class="logo-text">City<span>Ride</span></div>
+      <div class="logo-sub">Analytics Command Centre</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div class="live-badge"><div class="live-dot"></div>LIVE DATA</div>
+    <div class="timestamp" id="clock"></div>
+  </div>
+</header>
+
+<nav>
+  <button class="tab active" onclick="switchTab('overview')">Overview</button>
+  <button class="tab" onclick="switchTab('rentals')">Rentals</button>
+  <button class="tab" onclick="switchTab('fleet')">Fleet</button>
+  <button class="tab" onclick="switchTab('anomaly')">Anomaly Detection</button>
+  <button class="tab" onclick="switchTab('stations')">Stations</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════ OVERVIEW ══════════════════ -->
+<div class="panel active" id="panel-overview">
+
+  <div class="kpi-grid">
+    <div class="kpi-card warn">
+      <div class="kpi-icon">⚠️</div>
+      <div class="kpi-label">KPI 1 · Anomaly Probability</div>
+      <div class="kpi-value" style="color:var(--warn)">17.5<span class="unit">%</span></div>
+      <div class="kpi-delta down">↑ 21 flagged rentals of 120</div>
+    </div>
+    <div class="kpi-card ok">
+      <div class="kpi-icon">📡</div>
+      <div class="kpi-label">KPI 2 · Station Availability</div>
+      <div class="kpi-value" style="color:var(--accent3)">84.2<span class="unit">%</span></div>
+      <div class="kpi-delta up">101 of 120 stations active</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">👤</div>
+      <div class="kpi-label">KPI 3 · Active Rider Ratio</div>
+      <div class="kpi-value" style="color:var(--accent)">21.7<span class="unit">%</span></div>
+      <div class="kpi-delta" style="color:var(--muted)">26 active / 120 registered</div>
+    </div>
+    <div class="kpi-card warn">
+      <div class="kpi-icon">🔧</div>
+      <div class="kpi-label">KPI 4 · Fleet Health Index</div>
+      <div class="kpi-value" style="color:var(--accent2)">30.0<span class="unit">%</span></div>
+      <div class="kpi-delta down">↓ 42 bikes in maintenance</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">KPI 5 · ARR App vs Kiosk</div>
+      <div class="kpi-value" style="color:var(--accent4)">₹696<span class="unit">/app</span></div>
+      <div class="kpi-delta up">Kiosk avg ₹491 · App +42%</div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Monthly Rental Volume <span class="badge">17 months</span></div>
+      <div class="chart-wrap"><canvas id="rentalTrendChart" height="90"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Revenue by Plan Type <span class="badge">₹75,762 total</span></div>
+      <div class="chart-wrap"><canvas id="planRevenueChart" height="90"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Channel Split</div>
+      <div class="chart-wrap"><canvas id="channelChart" height="130"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Bike Fleet Status</div>
+      <div class="chart-wrap"><canvas id="bikeStatusChart" height="130"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Station Zone Health</div>
+      <div class="chart-wrap"><canvas id="zoneChart" height="130"></canvas></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ RENTALS ══════════════════ -->
+<div class="panel" id="panel-rentals">
+
+  <div class="table-card">
+    <div class="table-header">
+      <span>Rental Transactions <span style="color:var(--text);margin-left:8px">120 records</span></span>
+      <div class="filter-row">
+        <select id="filterChannel" onchange="filterTable()">
+          <option value="">All Channels</option>
+          <option value="app">App</option>
+          <option value="kiosk">Kiosk</option>
+        </select>
+        <select id="filterPlan" onchange="filterTable()">
+          <option value="">All Plans</option>
+          <option value="payg">PAYG</option>
+          <option value="monthly">Monthly</option>
+          <option value="annual">Annual</option>
+          <option value="day_pass">Day Pass</option>
+        </select>
+        <select id="filterFlag" onchange="filterTable()">
+          <option value="">All Status</option>
+          <option value="true">Flagged</option>
+          <option value="false">Clean</option>
+        </select>
+        <input type="text" id="searchRental" placeholder="Search rental ID..." oninput="filterTable()">
+      </div>
+    </div>
+    <div style="overflow-x:auto;max-height:480px;overflow-y:auto">
+      <table id="rentalTable">
+        <thead>
+          <tr>
+            <th>Rental ID</th>
+            <th>User</th>
+            <th>Bike</th>
+            <th>Start Station</th>
+            <th>Date</th>
+            <th>Duration</th>
+            <th>Distance</th>
+            <th>Price ₹</th>
+            <th>Channel</th>
+            <th>Plan</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="rentalTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="charts-row-2">
+    <div class="chart-card">
+      <div class="chart-title">Price Distribution by Channel</div>
+      <div class="chart-wrap"><canvas id="priceBoxChart" height="130"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Distance vs Duration Scatter</div>
+      <div class="chart-wrap"><canvas id="scatterChart" height="130"></canvas></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ FLEET ══════════════════ -->
+<div class="panel" id="panel-fleet">
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi-card ok">
+      <div class="kpi-label">Available</div>
+      <div class="kpi-value" style="color:var(--accent3)">52</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:43%;background:var(--accent3)"></div></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">In Use</div>
+      <div class="kpi-value" style="color:var(--accent)">21</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:17.5%;background:var(--accent)"></div></div>
+    </div>
+    <div class="kpi-card warn">
+      <div class="kpi-label">Maintenance</div>
+      <div class="kpi-value" style="color:var(--warn)">42</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:35%;background:var(--warn)"></div></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Retired</div>
+      <div class="kpi-value" style="color:var(--muted)">5</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:4%;background:var(--muted)"></div></div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Bike Type Distribution</div>
+      <div class="chart-wrap"><canvas id="bikeTypeChart" height="150"></canvas></div>
+    </div>
+    <div class="chart-card" style="grid-column:span 2">
+      <div class="chart-title">Odometer Distribution (km) <span class="badge">120 bikes</span></div>
+      <div class="chart-wrap"><canvas id="odometerChart" height="150"></canvas></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span>Bike Fleet Register</span>
+      <div class="filter-row">
+        <select id="filterBikeStatus" onchange="filterFleetTable()">
+          <option value="">All Status</option>
+          <option value="available">Available</option>
+          <option value="in_use">In Use</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="retired">Retired</option>
+        </select>
+        <select id="filterBikeType" onchange="filterFleetTable()">
+          <option value="">All Types</option>
+          <option value="classic">Classic</option>
+          <option value="ebike">E-Bike</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x:auto;max-height:380px;overflow-y:auto">
+      <table id="fleetTable">
+        <thead>
+          <tr>
+            <th>Bike ID</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Purchase Date</th>
+            <th>Last Service</th>
+            <th>Odometer km</th>
+            <th>Battery %</th>
+            <th>Firmware</th>
+            <th>Health</th>
+          </tr>
+        </thead>
+        <tbody id="fleetTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ ANOMALY ══════════════════ -->
+<div class="panel" id="panel-anomaly">
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi-card warn">
+      <div class="kpi-label">Flagged Rentals</div>
+      <div class="kpi-value" style="color:var(--warn)">21</div>
+      <div class="kpi-delta down">17.5% of all rentals</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-label">Ultra-Short Trips (&lt;2 min)</div>
+      <div class="kpi-value" style="color:var(--accent4)" id="shortTrips">—</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">High-Speed Anomalies</div>
+      <div class="kpi-value" style="color:var(--accent2)" id="highSpeed">—</div>
+    </div>
+    <div class="kpi-card warn">
+      <div class="kpi-label">Excessive Duration (&gt;5hr)</div>
+      <div class="kpi-value" style="color:var(--warn)" id="longDuration">—</div>
+    </div>
+  </div>
+
+  <div class="charts-row-2" style="margin-bottom:16px">
+    <div class="chart-card">
+      <div class="chart-title">Flagged vs Clean by Channel</div>
+      <div class="chart-wrap"><canvas id="anomalyChannelChart" height="150"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Anomaly Type Breakdown</div>
+      <div class="chart-wrap"><canvas id="anomalyTypeChart" height="150"></canvas></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">Flagged Rental Details — Rule Violations</div>
+    <div class="anomaly-list" id="anomalyList"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ STATIONS ══════════════════ -->
+<div class="panel" id="panel-stations">
+
+  <div class="table-card">
+    <div class="table-header">Station Zone Availability Summary</div>
+    <div class="zone-grid">
+      <div class="zone-card"><div class="zone-name">Z1</div><div class="zone-stat">Active: <b>21</b> / 25</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:84%;background:var(--accent3)"></div></div></div>
+      <div class="zone-card"><div class="zone-name">Z2</div><div class="zone-stat">Active: <b>17</b> / 24</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:70.8%;background:var(--accent4)"></div></div></div>
+      <div class="zone-card"><div class="zone-name">Z3</div><div class="zone-stat">Active: <b>22</b> / 24</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:91.7%;background:var(--accent3)"></div></div></div>
+      <div class="zone-card"><div class="zone-name">Z4</div><div class="zone-stat">Active: <b>19</b> / 23</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:82.6%;background:var(--accent3)"></div></div></div>
+      <div class="zone-card"><div class="zone-name">Z5</div><div class="zone-stat">Active: <b>22</b> / 24</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:91.7%;background:var(--accent3)"></div></div></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:16px">
+    <div class="chart-title">Top 10 Stations by Rental Activity <span class="badge">usage count</span></div>
+    <div class="chart-wrap"><canvas id="stationBarChart" height="80"></canvas></div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span>Station Register — 120 Stations</span>
+      <div class="filter-row">
+        <select id="filterZone" onchange="filterStationTable()">
+          <option value="">All Zones</option>
+          <option value="Z1">Z1</option>
+          <option value="Z2">Z2</option>
+          <option value="Z3">Z3</option>
+          <option value="Z4">Z4</option>
+          <option value="Z5">Z5</option>
+        </select>
+        <select id="filterStnStatus" onchange="filterStationTable()">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x:auto;max-height:380px;overflow-y:auto">
+      <table id="stationTable">
+        <thead>
+          <tr>
+            <th>Station ID</th>
+            <th>Name</th>
+            <th>Neighborhood</th>
+            <th>Zone</th>
+            <th>Capacity</th>
+            <th>Status</th>
+            <th>Install Date</th>
+            <th>Rentals</th>
+          </tr>
+        </thead>
+        <tbody id="stationTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+</main>
+
+<script>
+// ══ DATA ══════════════════════════════════════════
+const DATA = {
+  rentals: [{"rental_id":"RNT000001","user_id":"USR00048","bike_id":"BK0082","start_station_id":"STN0044","end_station_id":"STN0072","start_time":"2026-01-21 02:25:38","duration_sec":10028,"distance_km":7.279,"price":575.98,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000002","user_id":"USR00058","bike_id":"BK0086","start_station_id":"STN0048","end_station_id":"STN0065","start_time":"2025-08-22 08:31:10","duration_sec":5553,"distance_km":11.487,"price":646.97,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000003","user_id":"USR00085","bike_id":"BK0047","start_station_id":"STN0047","end_station_id":"STN0054","start_time":"2025-03-30 11:01:22","duration_sec":9538,"distance_km":5.338,"price":100.84,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000004","user_id":"USR00077","bike_id":"BK0091","start_station_id":"STN0069","end_station_id":"STN0037","start_time":"2025-11-09 13:39:30","duration_sec":3476,"distance_km":3.15,"price":500.53,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000005","user_id":"USR00044","bike_id":"BK0087","start_station_id":"STN0028","end_station_id":"STN0018","start_time":"2025-06-27 14:37:06","duration_sec":902,"distance_km":18.965,"price":379.36,"plan_type":"payg","channel":"app","is_flagged":true},{"rental_id":"RNT000006","user_id":"USR00049","bike_id":"BK0068","start_station_id":"STN0040","end_station_id":"STN0075","start_time":"2025-05-10 08:35:03","duration_sec":5265,"distance_km":6.897,"price":108.82,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000007","user_id":"USR00030","bike_id":"BK0062","start_station_id":"STN0056","end_station_id":"STN0023","start_time":"2025-06-13 16:42:19","duration_sec":3802,"distance_km":4.527,"price":72.99,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000008","user_id":"USR00001","bike_id":"BK0027","start_station_id":"STN0096","end_station_id":"STN0024","start_time":"2025-04-04 19:22:20","duration_sec":7241,"distance_km":8.023,"price":150.89,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000009","user_id":"USR00090","bike_id":"BK0012","start_station_id":"STN0007","end_station_id":"STN0008","start_time":"2025-07-08 10:15:24","duration_sec":7714,"distance_km":13.527,"price":615.08,"plan_type":"annual","channel":"app","is_flagged":false},{"rental_id":"RNT000010","user_id":"USR00074","bike_id":"BK0059","start_station_id":"STN0035","end_station_id":"STN0027","start_time":"2025-09-04 21:17:44","duration_sec":4148,"distance_km":5.241,"price":96.32,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000011","user_id":"USR00058","bike_id":"BK0038","start_station_id":"STN0012","end_station_id":"STN0074","start_time":"2025-12-31 22:45:10","duration_sec":5924,"distance_km":9.33,"price":567.48,"plan_type":"annual","channel":"app","is_flagged":false},{"rental_id":"RNT000012","user_id":"USR00067","bike_id":"BK0014","start_station_id":"STN0066","end_station_id":"STN0065","start_time":"2025-05-28 17:24:39","duration_sec":6742,"distance_km":7.754,"price":598.37,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000013","user_id":"USR00071","bike_id":"BK0058","start_station_id":"STN0004","end_station_id":"STN0054","start_time":"2025-06-14 12:52:02","duration_sec":5195,"distance_km":2.633,"price":50.81,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000014","user_id":"USR00059","bike_id":"BK0073","start_station_id":"STN0019","end_station_id":"STN0059","start_time":"2025-10-08 17:04:17","duration_sec":48,"distance_km":7.331,"price":595.44,"plan_type":"monthly","channel":"kiosk","is_flagged":true},{"rental_id":"RNT000015","user_id":"USR00034","bike_id":"BK0003","start_station_id":"STN0089","end_station_id":"STN0039","start_time":"2025-11-23 07:43:33","duration_sec":4748,"distance_km":6.07,"price":573.37,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000016","user_id":"USR00032","bike_id":"BK0033","start_station_id":"STN0010","end_station_id":"STN0002","start_time":"2025-12-11 06:41:18","duration_sec":9523,"distance_km":8.742,"price":609.67,"plan_type":"annual","channel":"app","is_flagged":false},{"rental_id":"RNT000017","user_id":"USR00065","bike_id":"BK0015","start_station_id":"STN0082","end_station_id":"STN0058","start_time":"2025-01-29 14:29:04","duration_sec":5613,"distance_km":10.428,"price":180.99,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000018","user_id":"USR00005","bike_id":"BK0100","start_station_id":"STN0006","end_station_id":"STN0091","start_time":"2025-03-25 03:36:33","duration_sec":6018,"distance_km":7.286,"price":595.48,"plan_type":"annual","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000019","user_id":"USR00049","bike_id":"BK0011","start_station_id":"STN0049","end_station_id":"STN0037","start_time":"2025-01-06 23:55:29","duration_sec":4791,"distance_km":4.856,"price":85.2,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000020","user_id":"USR00093","bike_id":"BK0088","start_station_id":"STN0031","end_station_id":"STN0084","start_time":"2025-11-13 23:50:00","duration_sec":4248,"distance_km":6.208,"price":590.77,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000021","user_id":"USR00030","bike_id":"BK0024","start_station_id":"STN0054","end_station_id":"STN0080","start_time":"2024-10-25 09:54:50","duration_sec":2693,"distance_km":1.947,"price":37.99,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000022","user_id":"USR00065","bike_id":"BK0029","start_station_id":"STN0073","end_station_id":"STN0062","start_time":"2025-01-17 20:12:04","duration_sec":84199,"distance_km":10.644,"price":606.57,"plan_type":"annual","channel":"app","is_flagged":true},{"rental_id":"RNT000023","user_id":"USR00024","bike_id":"BK0096","start_station_id":"STN0021","end_station_id":"STN0048","start_time":"2025-04-05 15:47:37","duration_sec":7302,"distance_km":6.742,"price":574.27,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000024","user_id":"USR00054","bike_id":"BK0041","start_station_id":"STN0080","end_station_id":"STN0025","start_time":"2025-02-25 16:05:34","duration_sec":3985,"distance_km":4.143,"price":79.28,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000025","user_id":"USR00076","bike_id":"BK0082","start_station_id":"STN0098","end_station_id":"STN0013","start_time":"2025-02-16 09:47:04","duration_sec":4834,"distance_km":4.434,"price":86.69,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000026","user_id":"USR00016","bike_id":"BK0060","start_station_id":"STN0022","end_station_id":"STN0060","start_time":"2025-05-22 07:02:34","duration_sec":4424,"distance_km":11.399,"price":578.45,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000027","user_id":"USR00089","bike_id":"BK0072","start_station_id":"STN0003","end_station_id":"STN0098","start_time":"2025-06-05 11:44:46","duration_sec":4283,"distance_km":3.718,"price":72.62,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000028","user_id":"USR00060","bike_id":"BK0034","start_station_id":"STN0008","end_station_id":"STN0052","start_time":"2025-04-22 12:11:28","duration_sec":6393,"distance_km":5.688,"price":589.56,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000029","user_id":"USR00061","bike_id":"BK0086","start_station_id":"STN0026","end_station_id":"STN0082","start_time":"2025-10-22 14:43:29","duration_sec":3957,"distance_km":12.066,"price":576.73,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000030","user_id":"USR00080","bike_id":"BK0098","start_station_id":"STN0036","end_station_id":"STN0077","start_time":"2025-07-19 21:23:24","duration_sec":3699,"distance_km":5.427,"price":93.49,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000031","user_id":"USR00018","bike_id":"BK0052","start_station_id":"STN0095","end_station_id":"STN0001","start_time":"2025-09-11 06:47:53","duration_sec":5148,"distance_km":8.636,"price":571.93,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000032","user_id":"USR00043","bike_id":"BK0079","start_station_id":"STN0087","end_station_id":"STN0045","start_time":"2025-01-19 11:03:15","duration_sec":4625,"distance_km":6.17,"price":117.9,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000033","user_id":"USR00040","bike_id":"BK0077","start_station_id":"STN0072","end_station_id":"STN0020","start_time":"2025-04-11 05:29:58","duration_sec":4975,"distance_km":4.972,"price":575.52,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000034","user_id":"USR00071","bike_id":"BK0001","start_station_id":"STN0059","end_station_id":"STN0099","start_time":"2025-10-31 00:02:38","duration_sec":5038,"distance_km":1.977,"price":585.39,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000035","user_id":"USR00026","bike_id":"BK0057","start_station_id":"STN0051","end_station_id":"STN0071","start_time":"2025-09-19 15:23:40","duration_sec":5836,"distance_km":5.517,"price":97.07,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000036","user_id":"USR00035","bike_id":"BK0038","start_station_id":"STN0053","end_station_id":"STN0099","start_time":"2025-09-17 09:32:46","duration_sec":4565,"distance_km":9.261,"price":564.26,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000037","user_id":"USR00086","bike_id":"BK0021","start_station_id":"STN0048","end_station_id":"STN0086","start_time":"2025-07-24 09:55:43","duration_sec":4261,"distance_km":8.394,"price":557.44,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000038","user_id":"USR00061","bike_id":"BK0043","start_station_id":"STN0067","end_station_id":"STN0029","start_time":"2025-09-07 14:57:35","duration_sec":3743,"distance_km":2.658,"price":51.29,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000039","user_id":"USR00012","bike_id":"BK0023","start_station_id":"STN0036","end_station_id":"STN0082","start_time":"2025-05-16 01:26:49","duration_sec":6527,"distance_km":7.576,"price":600.64,"plan_type":"annual","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000040","user_id":"USR00029","bike_id":"BK0035","start_station_id":"STN0001","end_station_id":"STN0094","start_time":"2025-09-12 01:40:01","duration_sec":4696,"distance_km":3.959,"price":558.41,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000041","user_id":"USR00083","bike_id":"BK0070","start_station_id":"STN0073","end_station_id":"STN0097","start_time":"2025-06-19 07:04:48","duration_sec":5399,"distance_km":8.501,"price":559.35,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000042","user_id":"USR00079","bike_id":"BK0090","start_station_id":"STN0015","end_station_id":"STN0026","start_time":"2025-04-14 22:05:50","duration_sec":4068,"distance_km":5.388,"price":562.24,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000043","user_id":"USR00063","bike_id":"BK0049","start_station_id":"STN0100","end_station_id":"STN0041","start_time":"2025-04-17 15:41:52","duration_sec":4948,"distance_km":6.054,"price":577.89,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000044","user_id":"USR00053","bike_id":"BK0026","start_station_id":"STN0063","end_station_id":"STN0049","start_time":"2025-06-02 00:02:13","duration_sec":4394,"distance_km":3.716,"price":71.28,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000045","user_id":"USR00095","bike_id":"BK0083","start_station_id":"STN0070","end_station_id":"STN0028","start_time":"2025-08-09 12:37:56","duration_sec":4591,"distance_km":9.617,"price":574.65,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000046","user_id":"USR00062","bike_id":"BK0018","start_station_id":"STN0073","end_station_id":"STN0048","start_time":"2025-07-17 04:01:24","duration_sec":3649,"distance_km":4.143,"price":549.58,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000047","user_id":"USR00026","bike_id":"BK0074","start_station_id":"STN0084","end_station_id":"STN0064","start_time":"2025-09-21 11:24:10","duration_sec":4459,"distance_km":6.034,"price":112.89,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000048","user_id":"USR00046","bike_id":"BK0040","start_station_id":"STN0044","end_station_id":"STN0010","start_time":"2025-04-30 18:36:37","duration_sec":4940,"distance_km":4.776,"price":582.02,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000049","user_id":"USR00057","bike_id":"BK0017","start_station_id":"STN0080","end_station_id":"STN0022","start_time":"2025-11-10 13:44:49","duration_sec":3916,"distance_km":6.024,"price":110.3,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000050","user_id":"USR00070","bike_id":"BK0039","start_station_id":"STN0052","end_station_id":"STN0015","start_time":"2025-11-25 22:48:23","duration_sec":4748,"distance_km":4.516,"price":562.12,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000051","user_id":"USR00056","bike_id":"BK0093","start_station_id":"STN0015","end_station_id":"STN0043","start_time":"2025-11-20 16:15:01","duration_sec":5222,"distance_km":5.073,"price":596.25,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000052","user_id":"USR00014","bike_id":"BK0088","start_station_id":"STN0055","end_station_id":"STN0023","start_time":"2025-09-27 00:30:14","duration_sec":5161,"distance_km":7.648,"price":556.25,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000053","user_id":"USR00007","bike_id":"BK0006","start_station_id":"STN0033","end_station_id":"STN0077","start_time":"2025-09-25 12:02:14","duration_sec":4398,"distance_km":6.476,"price":107.16,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000054","user_id":"USR00047","bike_id":"BK0002","start_station_id":"STN0011","end_station_id":"STN0062","start_time":"2025-08-28 14:56:34","duration_sec":3819,"distance_km":4.784,"price":553.33,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000055","user_id":"USR00037","bike_id":"BK0078","start_station_id":"STN0008","end_station_id":"STN0099","start_time":"2025-04-28 02:00:43","duration_sec":4791,"distance_km":8.003,"price":599.47,"plan_type":"annual","channel":"app","is_flagged":false},{"rental_id":"RNT000056","user_id":"USR00069","bike_id":"BK0097","start_station_id":"STN0092","end_station_id":"STN0031","start_time":"2025-11-18 21:27:53","duration_sec":3895,"distance_km":8.0,"price":601.73,"plan_type":"annual","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000057","user_id":"USR00001","bike_id":"BK0045","start_station_id":"STN0057","end_station_id":"STN0043","start_time":"2025-05-08 14:49:56","duration_sec":5051,"distance_km":4.524,"price":88.32,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000058","user_id":"USR00073","bike_id":"BK0031","start_station_id":"STN0043","end_station_id":"STN0008","start_time":"2025-06-18 22:49:09","duration_sec":5432,"distance_km":8.613,"price":560.27,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000059","user_id":"USR00022","bike_id":"BK0064","start_station_id":"STN0016","end_station_id":"STN0068","start_time":"2025-04-08 09:30:21","duration_sec":5007,"distance_km":9.137,"price":150.4,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000060","user_id":"USR00063","bike_id":"BK0044","start_station_id":"STN0069","end_station_id":"STN0076","start_time":"2025-08-01 10:54:42","duration_sec":3748,"distance_km":4.506,"price":85.85,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000061","user_id":"USR00041","bike_id":"BK0081","start_station_id":"STN0017","end_station_id":"STN0084","start_time":"2025-09-02 22:26:52","duration_sec":2793,"distance_km":3.558,"price":68.64,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000062","user_id":"USR00034","bike_id":"BK0075","start_station_id":"STN0048","end_station_id":"STN0020","start_time":"2024-11-21 22:04:36","duration_sec":4503,"distance_km":7.655,"price":563.93,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000063","user_id":"USR00065","bike_id":"BK0042","start_station_id":"STN0073","end_station_id":"STN0096","start_time":"2025-09-22 21:38:43","duration_sec":5175,"distance_km":8.256,"price":573.0,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000064","user_id":"USR00025","bike_id":"BK0057","start_station_id":"STN0048","end_station_id":"STN0035","start_time":"2025-10-20 16:25:23","duration_sec":5068,"distance_km":4.636,"price":563.99,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000065","user_id":"USR00086","bike_id":"BK0031","start_station_id":"STN0048","end_station_id":"STN0001","start_time":"2025-09-14 17:44:14","duration_sec":4591,"distance_km":5.625,"price":100.41,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000066","user_id":"USR00015","bike_id":"BK0095","start_station_id":"STN0020","end_station_id":"STN0014","start_time":"2024-10-15 20:01:55","duration_sec":4786,"distance_km":5.285,"price":574.83,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000067","user_id":"USR00066","bike_id":"BK0051","start_station_id":"STN0039","end_station_id":"STN0092","start_time":"2025-04-26 07:47:30","duration_sec":3784,"distance_km":4.374,"price":83.54,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000068","user_id":"USR00044","bike_id":"BK0069","start_station_id":"STN0067","end_station_id":"STN0093","start_time":"2025-07-25 03:46:37","duration_sec":5024,"distance_km":6.208,"price":568.38,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000069","user_id":"USR00013","bike_id":"BK0037","start_station_id":"STN0062","end_station_id":"STN0020","start_time":"2025-10-27 22:06:54","duration_sec":4977,"distance_km":6.009,"price":577.37,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000070","user_id":"USR00023","bike_id":"BK0085","start_station_id":"STN0084","end_station_id":"STN0013","start_time":"2024-10-24 14:25:13","duration_sec":5063,"distance_km":7.082,"price":575.41,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000071","user_id":"USR00050","bike_id":"BK0055","start_station_id":"STN0048","end_station_id":"STN0093","start_time":"2025-02-04 15:37:22","duration_sec":4819,"distance_km":9.14,"price":140.19,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000072","user_id":"USR00043","bike_id":"BK0025","start_station_id":"STN0039","end_station_id":"STN0032","start_time":"2025-06-28 12:43:50","duration_sec":6131,"distance_km":5.716,"price":576.09,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000073","user_id":"USR00022","bike_id":"BK0094","start_station_id":"STN0015","end_station_id":"STN0018","start_time":"2025-07-22 09:40:53","duration_sec":6081,"distance_km":8.543,"price":564.1,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000074","user_id":"USR00059","bike_id":"BK0016","start_station_id":"STN0009","end_station_id":"STN0083","start_time":"2025-02-01 08:47:04","duration_sec":5052,"distance_km":3.965,"price":76.63,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000075","user_id":"USR00099","bike_id":"BK0032","start_station_id":"STN0087","end_station_id":"STN0024","start_time":"2025-03-23 03:53:18","duration_sec":5039,"distance_km":5.487,"price":566.49,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000076","user_id":"USR00069","bike_id":"BK0068","start_station_id":"STN0055","end_station_id":"STN0090","start_time":"2025-01-12 00:15:01","duration_sec":5416,"distance_km":5.929,"price":566.64,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000077","user_id":"USR00074","bike_id":"BK0066","start_station_id":"STN0071","end_station_id":"STN0028","start_time":"2025-09-29 14:48:06","duration_sec":3831,"distance_km":5.162,"price":565.24,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000078","user_id":"USR00038","bike_id":"BK0071","start_station_id":"STN0044","end_station_id":"STN0028","start_time":"2025-10-16 05:12:45","duration_sec":5396,"distance_km":4.853,"price":573.24,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000079","user_id":"USR00050","bike_id":"BK0033","start_station_id":"STN0097","end_station_id":"STN0037","start_time":"2025-05-14 07:48:26","duration_sec":3956,"distance_km":7.633,"price":559.31,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000080","user_id":"USR00031","bike_id":"BK0050","start_station_id":"STN0003","end_station_id":"STN0053","start_time":"2025-11-07 19:25:21","duration_sec":5459,"distance_km":5.77,"price":596.85,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000081","user_id":"USR00057","bike_id":"BK0007","start_station_id":"STN0084","end_station_id":"STN0100","start_time":"2025-07-10 20:04:42","duration_sec":3876,"distance_km":4.484,"price":557.77,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000082","user_id":"USR00013","bike_id":"BK0010","start_station_id":"STN0085","end_station_id":"STN0061","start_time":"2025-02-27 07:52:21","duration_sec":3827,"distance_km":4.879,"price":554.25,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000083","user_id":"USR00031","bike_id":"BK0080","start_station_id":"STN0067","end_station_id":"STN0044","start_time":"2025-02-21 15:07:02","duration_sec":4484,"distance_km":5.699,"price":100.31,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000084","user_id":"USR00042","bike_id":"BK0076","start_station_id":"STN0034","end_station_id":"STN0063","start_time":"2025-06-23 13:51:40","duration_sec":5256,"distance_km":11.168,"price":574.49,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000085","user_id":"USR00059","bike_id":"BK0067","start_station_id":"STN0067","end_station_id":"STN0091","start_time":"2025-08-15 12:28:03","duration_sec":4424,"distance_km":5.697,"price":573.07,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000086","user_id":"USR00097","bike_id":"BK0048","start_station_id":"STN0090","end_station_id":"STN0050","start_time":"2025-07-06 19:57:02","duration_sec":5018,"distance_km":5.499,"price":562.46,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000087","user_id":"USR00028","bike_id":"BK0084","start_station_id":"STN0023","end_station_id":"STN0041","start_time":"2025-03-06 03:44:30","duration_sec":5093,"distance_km":3.96,"price":76.53,"plan_type":"payg","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000088","user_id":"USR00015","bike_id":"BK0061","start_station_id":"STN0078","end_station_id":"STN0058","start_time":"2025-01-27 09:49:57","duration_sec":4891,"distance_km":5.655,"price":568.0,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000089","user_id":"USR00082","bike_id":"BK0056","start_station_id":"STN0046","end_station_id":"STN0013","start_time":"2025-02-16 05:11:25","duration_sec":4791,"distance_km":6.483,"price":562.51,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000090","user_id":"USR00028","bike_id":"BK0059","start_station_id":"STN0030","end_station_id":"STN0069","start_time":"2025-01-02 05:18:56","duration_sec":5299,"distance_km":7.073,"price":574.18,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000091","user_id":"USR00091","bike_id":"BK0019","start_station_id":"STN0044","end_station_id":"STN0007","start_time":"2025-08-03 18:21:49","duration_sec":4617,"distance_km":6.032,"price":572.46,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000092","user_id":"USR00036","bike_id":"BK0053","start_station_id":"STN0036","end_station_id":"STN0047","start_time":"2025-10-05 07:58:40","duration_sec":6019,"distance_km":4.916,"price":597.51,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000093","user_id":"USR00078","bike_id":"BK0092","start_station_id":"STN0019","end_station_id":"STN0097","start_time":"2026-02-05 22:48:20","duration_sec":4924,"distance_km":8.163,"price":571.91,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000094","user_id":"USR00096","bike_id":"BK0008","start_station_id":"STN0064","end_station_id":"STN0094","start_time":"2026-01-15 06:55:12","duration_sec":4607,"distance_km":5.485,"price":573.55,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000095","user_id":"USR00045","bike_id":"BK0030","start_station_id":"STN0079","end_station_id":"STN0076","start_time":"2026-01-06 17:36:00","duration_sec":5249,"distance_km":4.979,"price":595.46,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000096","user_id":"USR00082","bike_id":"BK0004","start_station_id":"STN0014","end_station_id":"STN0046","start_time":"2026-02-08 07:13:10","duration_sec":5083,"distance_km":7.38,"price":578.97,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000097","user_id":"USR00019","bike_id":"BK0065","start_station_id":"STN0053","end_station_id":"STN0073","start_time":"2026-03-08 22:23:54","duration_sec":4823,"distance_km":6.003,"price":581.58,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000098","user_id":"USR00048","bike_id":"BK0013","start_station_id":"STN0024","end_station_id":"STN0025","start_time":"2026-01-04 08:04:01","duration_sec":4987,"distance_km":6.432,"price":575.13,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000099","user_id":"USR00005","bike_id":"BK0009","start_station_id":"STN0071","end_station_id":"STN0068","start_time":"2026-02-14 03:32:24","duration_sec":5058,"distance_km":6.047,"price":571.47,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000100","user_id":"USR00074","bike_id":"BK0020","start_station_id":"STN0007","end_station_id":"STN0054","start_time":"2026-01-22 04:51:22","duration_sec":4994,"distance_km":9.183,"price":574.18,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000101","user_id":"USR00101","bike_id":"BK0101","start_station_id":"STN0101","end_station_id":"STN0005","start_time":"2026-03-01 08:00:00","duration_sec":1200,"distance_km":3.5,"price":65.0,"plan_type":"payg","channel":"app","is_flagged":false},{"rental_id":"RNT000102","user_id":"USR00102","bike_id":"BK0102","start_station_id":"STN0102","end_station_id":"STN0010","start_time":"2026-03-02 09:15:00","duration_sec":75,"distance_km":12.0,"price":420.0,"plan_type":"payg","channel":"kiosk","is_flagged":true},{"rental_id":"RNT000103","user_id":"USR00103","bike_id":"BK0103","start_station_id":"STN0103","end_station_id":"STN0020","start_time":"2026-03-03 14:30:00","duration_sec":72000,"distance_km":5.0,"price":580.0,"plan_type":"annual","channel":"app","is_flagged":true},{"rental_id":"RNT000104","user_id":"USR00104","bike_id":"BK0104","start_station_id":"STN0104","end_station_id":"STN0030","start_time":"2026-03-04 07:00:00","duration_sec":3600,"distance_km":0.1,"price":560.0,"plan_type":"monthly","channel":"app","is_flagged":true},{"rental_id":"RNT000105","user_id":"USR00105","bike_id":"BK0105","start_station_id":"STN0105","end_station_id":"STN0040","start_time":"2026-03-05 11:00:00","duration_sec":5400,"distance_km":7.2,"price":590.0,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000106","user_id":"USR00106","bike_id":"BK0106","start_station_id":"STN0106","end_station_id":"STN0050","start_time":"2026-03-06 16:45:00","duration_sec":4200,"distance_km":5.8,"price":575.0,"plan_type":"annual","channel":"app","is_flagged":false},{"rental_id":"RNT000107","user_id":"USR00107","bike_id":"BK0107","start_station_id":"STN0107","end_station_id":"STN0060","start_time":"2026-03-07 08:30:00","duration_sec":30,"distance_km":8.5,"price":610.0,"plan_type":"monthly","channel":"kiosk","is_flagged":true},{"rental_id":"RNT000108","user_id":"USR00108","bike_id":"BK0108","start_station_id":"STN0108","end_station_id":"STN0070","start_time":"2026-03-08 12:00:00","duration_sec":6300,"distance_km":9.1,"price":640.0,"plan_type":"annual","channel":"app","is_flagged":false},{"rental_id":"RNT000109","user_id":"USR00109","bike_id":"BK0109","start_station_id":"STN0109","end_station_id":"STN0080","start_time":"2026-03-09 15:00:00","duration_sec":45,"distance_km":15.0,"price":380.0,"plan_type":"payg","channel":"app","is_flagged":true},{"rental_id":"RNT000110","user_id":"USR00110","bike_id":"BK0110","start_station_id":"STN0110","end_station_id":"STN0090","start_time":"2026-03-10 09:00:00","duration_sec":3900,"distance_km":4.5,"price":555.0,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000111","user_id":"USR00111","bike_id":"BK0111","start_station_id":"STN0111","end_station_id":"STN0001","start_time":"2026-03-11 17:20:00","duration_sec":85000,"distance_km":6.3,"price":595.0,"plan_type":"annual","channel":"app","is_flagged":true},{"rental_id":"RNT000112","user_id":"USR00112","bike_id":"BK0112","start_station_id":"STN0112","end_station_id":"STN0011","start_time":"2026-03-12 10:10:00","duration_sec":4500,"distance_km":7.8,"price":575.0,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000113","user_id":"USR00113","bike_id":"BK0113","start_station_id":"STN0113","end_station_id":"STN0021","start_time":"2026-03-13 14:00:00","duration_sec":5700,"distance_km":8.9,"price":620.0,"plan_type":"annual","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000114","user_id":"USR00114","bike_id":"BK0114","start_station_id":"STN0114","end_station_id":"STN0031","start_time":"2026-03-14 07:45:00","duration_sec":60,"distance_km":20.0,"price":400.0,"plan_type":"payg","channel":"kiosk","is_flagged":true},{"rental_id":"RNT000115","user_id":"USR00115","bike_id":"BK0115","start_station_id":"STN0115","end_station_id":"STN0041","start_time":"2026-03-15 13:30:00","duration_sec":4800,"distance_km":5.5,"price":565.0,"plan_type":"monthly","channel":"app","is_flagged":false},{"rental_id":"RNT000116","user_id":"USR00116","bike_id":"BK0116","start_station_id":"STN0116","end_station_id":"STN0051","start_time":"2026-03-16 09:50:00","duration_sec":90,"distance_km":11.0,"price":390.0,"plan_type":"payg","channel":"app","is_flagged":true},{"rental_id":"RNT000117","user_id":"USR00117","bike_id":"BK0117","start_station_id":"STN0117","end_station_id":"STN0061","start_time":"2026-03-17 18:00:00","duration_sec":5100,"distance_km":6.7,"price":580.0,"plan_type":"monthly","channel":"kiosk","is_flagged":false},{"rental_id":"RNT000118","user_id":"USR00118","bike_id":"BK0118","start_station_id":"STN0118","end_station_id":"STN0071","start_time":"2026-03-18 11:15:00","duration_sec":4950,"distance_km":7.1,"price":588.0,"plan_type":"annual","channel":"app","is_flagged":false},{"rental_id":"RNT000119","user_id":"USR00119","bike_id":"BK0119","start_station_id":"STN0119","end_station_id":"STN0081","start_time":"2026-03-19 16:00:00","duration_sec":78000,"distance_km":4.8,"price":560.0,"plan_type":"monthly","channel":"kiosk","is_flagged":true},{"rental_id":"RNT000120","user_id":"USR00120","bike_id":"BK0120","start_station_id":"STN0120","end_station_id":"STN0091","start_time":"2026-03-20 08:30:00","duration_sec":4650,"distance_km":6.9,"price":572.0,"plan_type":"day_pass","channel":"app","is_flagged":false}],
+
+  bikes: [{"bike_id":"BK0001","bike_type":"classic","status":"available","purchase_date":"2022-01-19","last_service_date":"2025-02-11","odometer_km":7315.7,"battery_level":null,"firmware_version":"v3.2.5"},{"bike_id":"BK0002","bike_type":"ebike","status":"in_use","purchase_date":"2024-03-04","last_service_date":"2025-02-16","odometer_km":1675.0,"battery_level":2,"firmware_version":"v2.2.3"},{"bike_id":"BK0003","bike_type":"classic","status":"available","purchase_date":"2024-01-10","last_service_date":"2025-03-15","odometer_km":9556.6,"battery_level":null,"firmware_version":"v3.1.0"},{"bike_id":"BK0004","bike_type":"ebike","status":"available","purchase_date":"2022-12-29","last_service_date":"2025-12-24","odometer_km":4876.5,"battery_level":58,"firmware_version":"v2.1.0"},{"bike_id":"BK0005","bike_type":"classic","status":"maintenance","purchase_date":"2023-05-10","last_service_date":"2024-08-30","odometer_km":12000.0,"battery_level":null,"firmware_version":"v3.0.0"},{"bike_id":"BK0006","bike_type":"ebike","status":"in_use","purchase_date":"2021-07-15","last_service_date":"2025-01-20","odometer_km":3200.0,"battery_level":45,"firmware_version":"v2.3.1"},{"bike_id":"BK0007","bike_type":"classic","status":"available","purchase_date":"2023-11-01","last_service_date":"2025-04-10","odometer_km":5500.0,"battery_level":null,"firmware_version":"v3.2.0"},{"bike_id":"BK0008","bike_type":"ebike","status":"maintenance","purchase_date":"2022-06-20","last_service_date":"2024-06-15","odometer_km":8900.0,"battery_level":10,"firmware_version":"v2.1.5"},{"bike_id":"BK0009","bike_type":"classic","status":"available","purchase_date":"2024-02-14","last_service_date":"2025-05-01","odometer_km":2200.0,"battery_level":null,"firmware_version":"v3.2.5"},{"bike_id":"BK0010","bike_type":"ebike","status":"available","purchase_date":"2023-09-09","last_service_date":"2025-03-20","odometer_km":6100.0,"battery_level":72,"firmware_version":"v2.2.3"},{"bike_id":"BK0011","bike_type":"classic","status":"maintenance","purchase_date":"2021-03-05","last_service_date":"2023-11-10","odometer_km":14500.0,"battery_level":null,"firmware_version":"v3.0.0"},{"bike_id":"BK0012","bike_type":"ebike","status":"in_use","purchase_date":"2022-08-18","last_service_date":"2025-01-05","odometer_km":7800.0,"battery_level":55,"firmware_version":"v2.3.0"},{"bike_id":"BK0013","bike_type":"classic","status":"available","purchase_date":"2023-12-25","last_service_date":"2025-06-01","odometer_km":3100.0,"battery_level":null,"firmware_version":"v3.1.5"},{"bike_id":"BK0014","bike_type":"ebike","status":"maintenance","purchase_date":"2021-11-30","last_service_date":"2024-04-20","odometer_km":11200.0,"battery_level":5,"firmware_version":"v2.0.8"},{"bike_id":"BK0015","bike_type":"classic","status":"in_use","purchase_date":"2024-04-17","last_service_date":"2025-07-10","odometer_km":1800.0,"battery_level":null,"firmware_version":"v3.2.5"},{"bike_id":"BK0016","bike_type":"ebike","status":"available","purchase_date":"2023-02-28","last_service_date":"2025-02-28","odometer_km":5400.0,"battery_level":88,"firmware_version":"v2.2.0"},{"bike_id":"BK0017","bike_type":"classic","status":"available","purchase_date":"2022-07-04","last_service_date":"2025-04-15","odometer_km":7200.0,"battery_level":null,"firmware_version":"v3.1.0"},{"bike_id":"BK0018","bike_type":"ebike","status":"maintenance","purchase_date":"2021-05-22","last_service_date":"2023-09-30","odometer_km":13800.0,"battery_level":0,"firmware_version":"v2.0.5"},{"bike_id":"BK0019","bike_type":"classic","status":"available","purchase_date":"2024-07-11","last_service_date":"2025-08-05","odometer_km":900.0,"battery_level":null,"firmware_version":"v3.2.5"},{"bike_id":"BK0020","bike_type":"ebike","status":"in_use","purchase_date":"2023-06-16","last_service_date":"2025-01-15","odometer_km":5900.0,"battery_level":61,"firmware_version":"v2.2.3"}],
+
+  stations: [{"station_id":"STN0001","station_name":"Downtown Station 1","latitude":12.976624,"longitude":77.577035,"capacity":15,"neighborhood":"Old City","city_zone":"Z1","install_date":"2022-03-04","status":"active"},{"station_id":"STN0002","station_name":"North Station 2","latitude":12.995676,"longitude":77.638901,"capacity":25,"neighborhood":"Koramangala","city_zone":"Z2","install_date":"2023-04-28","status":"active"},{"station_id":"STN0003","station_name":"South Station 3","latitude":12.903056,"longitude":77.569597,"capacity":30,"neighborhood":"Jayanagar","city_zone":"Z3","install_date":"2023-02-25","status":"active"},{"station_id":"STN0004","station_name":"East Station 4","latitude":12.961784,"longitude":77.707444,"capacity":30,"neighborhood":"Sarjapur","city_zone":"Z4","install_date":"2022-10-14","status":"active"},{"station_id":"STN0005","station_name":"West Station 5","latitude":12.960987,"longitude":77.531847,"capacity":20,"neighborhood":"Rajajinagar","city_zone":"Z5","install_date":"2023-08-19","status":"inactive"},{"station_id":"STN0006","station_name":"Downtown Station 6","latitude":12.974532,"longitude":77.609124,"capacity":25,"neighborhood":"Cubbon Park","city_zone":"Z1","install_date":"2022-11-02","status":"active"},{"station_id":"STN0007","station_name":"North Station 7","latitude":13.034521,"longitude":77.597843,"capacity":20,"neighborhood":"Hebbal","city_zone":"Z2","install_date":"2023-07-15","status":"active"},{"station_id":"STN0008","station_name":"South Station 8","latitude":12.920341,"longitude":77.623456,"capacity":15,"neighborhood":"BTM Layout","city_zone":"Z3","install_date":"2022-05-20","status":"active"},{"station_id":"STN0009","station_name":"East Station 9","latitude":12.98765,"longitude":77.749832,"capacity":30,"neighborhood":"Whitefield","city_zone":"Z4","install_date":"2024-01-10","status":"active"},{"station_id":"STN0010","station_name":"West Station 10","latitude":12.997543,"longitude":77.498234,"capacity":20,"neighborhood":"Yeshwanthpur","city_zone":"Z5","install_date":"2023-03-22","status":"active"}]
+};
+
+// ══ UTILS ══════════════════════════════════════
+const fmtDur = s => {
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+};
+const fmtDate = dt => dt ? dt.split(' ')[0] : '—';
+
+// ══ CLOCK ══════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleString('en-IN', {timeZone:'Asia/Kolkata',hour12:false,year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' IST';
+}
+updateClock(); setInterval(updateClock, 1000);
+
+// ══ TABS ══════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.textContent.toLowerCase().includes(name.substring(0,4))));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+}
+// Fix tab active state properly
+document.querySelectorAll('.tab').forEach((t,i) => {
+  const names = ['overview','rentals','fleet','anomaly','stations'];
+  t.onclick = () => switchTab(names[i]);
+});
+
+// ══ CHART DEFAULTS ══════════════════════════════
+Chart.defaults.color = '#5a7a94';
+Chart.defaults.borderColor = '#1e2d3d';
+Chart.defaults.font.family = "'Space Mono', monospace";
+Chart.defaults.font.size = 11;
+
+// ══ CHARTS ══════════════════════════════════════
+// 1. Monthly rentals
+const monthlyData = {"2024-10":4,"2024-11":1,"2025-01":7,"2025-02":4,"2025-03":5,"2025-04":7,"2025-05":7,"2025-06":8,"2025-07":6,"2025-08":5,"2025-09":10,"2025-10":11,"2025-11":9,"2025-12":4,"2026-01":9,"2026-02":12,"2026-03":11};
+new Chart(document.getElementById('rentalTrendChart'), {
+  type: 'bar',
+  data: {
+    labels: Object.keys(monthlyData),
+    datasets: [{
+      label: 'Rentals',
+      data: Object.values(monthlyData),
+      backgroundColor: Object.keys(monthlyData).map(k => k >= '2026' ? 'rgba(0,229,255,0.8)' : 'rgba(0,229,255,0.3)'),
+      borderRadius: 4, borderSkipped: false,
+    }]
+  },
+  options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{grid:{color:'rgba(30,45,61,0.8)'}}, x:{grid:{display:false}}} }
+});
+
+// 2. Plan revenue donut
+new Chart(document.getElementById('planRevenueChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Monthly','PAYG','Annual','Day Pass'],
+    datasets: [{data:[18272,4201,50346,2942], backgroundColor:['rgba(0,229,255,0.8)','rgba(255,107,53,0.8)','rgba(127,255,110,0.8)','rgba(255,204,0,0.8)'], borderWidth:0, hoverOffset:8}]
+  },
+  options: { responsive:true, cutout:'65%', plugins:{legend:{position:'right', labels:{boxWidth:10, padding:16}}} }
+});
+
+// 3. Channel split
+new Chart(document.getElementById('channelChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['App (82)','Kiosk (38)'],
+    datasets: [{data:[82,38], backgroundColor:['rgba(0,229,255,0.8)','rgba(255,107,53,0.8)'], borderWidth:0}]
+  },
+  options: { responsive:true, cutout:'60%', plugins:{legend:{position:'bottom', labels:{boxWidth:10}}} }
+});
+
+// 4. Bike status
+new Chart(document.getElementById('bikeStatusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Available','In Use','Maintenance','Retired'],
+    datasets: [{data:[52,21,42,5], backgroundColor:['rgba(127,255,110,0.8)','rgba(0,229,255,0.8)','rgba(255,59,92,0.8)','rgba(90,122,148,0.6)'], borderWidth:0}]
+  },
+  options: { responsive:true, cutout:'60%', plugins:{legend:{position:'bottom', labels:{boxWidth:10}}} }
+});
+
+// 5. Zone chart
+new Chart(document.getElementById('zoneChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Z1','Z2','Z3','Z4','Z5'],
+    datasets: [
+      {label:'Active', data:[21,17,22,19,22], backgroundColor:'rgba(127,255,110,0.7)', borderRadius:3},
+      {label:'Inactive', data:[4,7,2,4,2], backgroundColor:'rgba(255,59,92,0.5)', borderRadius:3},
+    ]
+  },
+  options: { responsive:true, scales:{x:{stacked:true, grid:{display:false}}, y:{stacked:true, grid:{color:'rgba(30,45,61,0.8)'}}}, plugins:{legend:{labels:{boxWidth:10}}} }
+});
+
+// ══ RENTAL TABLE ══════════════════════════════
+let allRentals = DATA.rentals;
+function renderRentalTable(data) {
+  const tbody = document.getElementById('rentalTableBody');
+  tbody.innerHTML = data.slice(0,80).map(r => `
+    <tr>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">${r.rental_id}</td>
+      <td style="font-family:var(--font-mono);font-size:11px">${r.user_id}</td>
+      <td style="font-family:var(--font-mono);font-size:11px">${r.bike_id}</td>
+      <td style="font-family:var(--font-mono);font-size:11px">${r.start_station_id}</td>
+      <td style="font-size:12px">${fmtDate(r.start_time)}</td>
+      <td style="font-size:12px">${fmtDur(r.duration_sec)}</td>
+      <td style="font-size:12px">${r.distance_km} km</td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent4)">₹${r.price}</td>
+      <td><span class="tag tag-${r.channel}">${r.channel}</span></td>
+      <td><span class="tag tag-${r.plan_type}">${r.plan_type}</span></td>
+      <td><span class="tag ${r.is_flagged ? 'tag-flagged' : 'tag-ok'}">${r.is_flagged ? '⚠ FLAGGED' : '✓ CLEAN'}</span></td>
+    </tr>`).join('');
+}
+function filterTable() {
+  const ch = document.getElementById('filterChannel').value;
+  const pl = document.getElementById('filterPlan').value;
+  const fl = document.getElementById('filterFlag').value;
+  const sr = document.getElementById('searchRental').value.toLowerCase();
+  const filtered = allRentals.filter(r =>
+    (!ch || r.channel === ch) &&
+    (!pl || r.plan_type === pl) &&
+    (!fl || String(r.is_flagged) === fl) &&
+    (!sr || r.rental_id.toLowerCase().includes(sr))
+  );
+  renderRentalTable(filtered);
+}
+renderRentalTable(allRentals);
+
+// Scatter chart (distance vs duration)
+const scatterCtx = document.getElementById('scatterChart');
+const flaggedR = DATA.rentals.filter(r=>r.is_flagged);
+const cleanR = DATA.rentals.filter(r=>!r.is_flagged);
+new Chart(scatterCtx, {
+  type: 'scatter',
+  data: {
+    datasets: [
+      {label:'Clean', data: cleanR.map(r=>({x:r.distance_km, y:r.duration_sec/60})), backgroundColor:'rgba(0,229,255,0.5)', pointRadius:4},
+      {label:'Flagged', data: flaggedR.map(r=>({x:r.distance_km, y:r.duration_sec/60})), backgroundColor:'rgba(255,59,92,0.8)', pointRadius:5},
+    ]
+  },
+  options: { responsive:true, plugins:{legend:{labels:{boxWidth:10}}}, scales:{x:{title:{display:true,text:'Distance (km)'},grid:{color:'rgba(30,45,61,0.8)'}}, y:{title:{display:true,text:'Duration (min)'},grid:{color:'rgba(30,45,61,0.8)'}}} }
+});
+
+// Price by channel bar
+new Chart(document.getElementById('priceBoxChart'), {
+  type: 'bar',
+  data: {
+    labels: ['App','Kiosk'],
+    datasets: [{label:'Avg Revenue ₹', data:[696.2, 491.42], backgroundColor:['rgba(0,229,255,0.75)','rgba(255,107,53,0.75)'], borderRadius:6}]
+  },
+  options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{grid:{color:'rgba(30,45,61,0.8)'}}, x:{grid:{display:false}}} }
+});
+
+// ══ FLEET TABLE ══════════════════════════════
+function renderFleetTable(data) {
+  const tbody = document.getElementById('fleetTableBody');
+  const now = new Date('2026-01-01');
+  tbody.innerHTML = data.map(b => {
+    const bat = b.battery_level !== null && b.battery_level !== undefined ? b.battery_level : null;
+    const svcDate = b.last_service_date ? new Date(b.last_service_date) : null;
+    const daysSvc = svcDate ? Math.floor((now - svcDate)/(1000*86400)) : 9999;
+    let healthy = true;
+    if (b.bike_type === 'ebike' && bat !== null && bat < 25) healthy = false;
+    if (b.odometer_km > 15000) healthy = false;
+    if (daysSvc > 365) healthy = false;
+    const batDisplay = bat !== null ? `${bat}%` : '—';
+    const batColor = bat !== null ? (bat < 25 ? 'var(--warn)' : bat < 50 ? 'var(--accent4)' : 'var(--accent3)') : 'var(--muted)';
+    return `<tr>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">${b.bike_id}</td>
+      <td><span class="tag ${b.bike_type==='ebike'?'tag-app':'tag-kiosk'}">${b.bike_type}</span></td>
+      <td><span class="status-dot dot-${b.status}"></span>${b.status}</td>
+      <td style="font-size:12px">${b.purchase_date||'—'}</td>
+      <td style="font-size:12px">${b.last_service_date||'—'}</td>
+      <td style="font-family:var(--font-mono);font-size:12px">${b.odometer_km?.toFixed(1)||'—'}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:${batColor}">${batDisplay}</td>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">${b.firmware_version||'—'}</td>
+      <td><span class="tag ${healthy?'tag-ok':'tag-flagged'}">${healthy?'✓ OK':'⚠ ALERT'}</span></td>
+    </tr>`;
+  }).join('');
+}
+function filterFleetTable() {
+  const st = document.getElementById('filterBikeStatus').value;
+  const ty = document.getElementById('filterBikeType').value;
+  renderFleetTable(DATA.bikes.filter(b => (!st||b.status===st) && (!ty||b.bike_type===ty)));
+}
+renderFleetTable(DATA.bikes);
+
+// Bike type chart
+new Chart(document.getElementById('bikeTypeChart'), {
+  type: 'doughnut',
+  data: {labels:['Classic (64)','E-Bike (56)'], datasets:[{data:[64,56], backgroundColor:['rgba(255,107,53,0.8)','rgba(0,229,255,0.8)'], borderWidth:0}]},
+  options: { responsive:true, cutout:'60%', plugins:{legend:{position:'bottom',labels:{boxWidth:10}}} }
+});
+
+// Odometer histogram
+const odos = DATA.bikes.map(b=>b.odometer_km).filter(Boolean);
+const bins = [0,2000,4000,6000,8000,10000,12000,15000];
+const counts = bins.slice(0,-1).map((_,i)=>odos.filter(o=>o>=bins[i]&&o<bins[i+1]).length);
+new Chart(document.getElementById('odometerChart'), {
+  type: 'bar',
+  data: {labels:bins.slice(0,-1).map((b,i)=>`${b/1000}k-${bins[i+1]/1000}k`), datasets:[{data:counts, backgroundColor:'rgba(0,229,255,0.6)', borderRadius:4}]},
+  options: {responsive:true, plugins:{legend:{display:false}}, scales:{y:{grid:{color:'rgba(30,45,61,0.8)'}}, x:{grid:{display:false}}}}
+});
+
+// ══ ANOMALY PANEL ══════════════════════════════
+const shortTrips = DATA.rentals.filter(r=>r.duration_sec < 120).length;
+const highSpeedTrips = DATA.rentals.filter(r=> r.duration_sec > 0 && (r.distance_km/(r.duration_sec/3600)) > 40).length;
+const longDuration = DATA.rentals.filter(r=>r.duration_sec > 18000).length;
+document.getElementById('shortTrips').textContent = shortTrips;
+document.getElementById('highSpeed').textContent = highSpeedTrips;
+document.getElementById('longDuration').textContent = longDuration;
+
+// Anomaly channel chart
+const appFlagged = DATA.rentals.filter(r=>r.channel==='app'&&r.is_flagged).length;
+const appClean = DATA.rentals.filter(r=>r.channel==='app'&&!r.is_flagged).length;
+const kioskFlagged = DATA.rentals.filter(r=>r.channel==='kiosk'&&r.is_flagged).length;
+const kioskClean = DATA.rentals.filter(r=>r.channel==='kiosk'&&!r.is_flagged).length;
+new Chart(document.getElementById('anomalyChannelChart'), {
+  type:'bar',
+  data:{labels:['App','Kiosk'], datasets:[
+    {label:'Clean', data:[appClean,kioskClean], backgroundColor:'rgba(127,255,110,0.7)', borderRadius:4},
+    {label:'Flagged', data:[appFlagged,kioskFlagged], backgroundColor:'rgba(255,59,92,0.7)', borderRadius:4},
+  ]},
+  options:{responsive:true, scales:{x:{stacked:true,grid:{display:false}}, y:{stacked:true,grid:{color:'rgba(30,45,61,0.8)'}}}, plugins:{legend:{labels:{boxWidth:10}}}}
+});
+
+// Anomaly type chart
+new Chart(document.getElementById('anomalyTypeChart'), {
+  type:'doughnut',
+  data:{labels:['Ultra-Short (<2min)','High Speed (>40km/h)','Excessive Duration (>5hr)','Other Flagged'],
+        datasets:[{data:[shortTrips, highSpeedTrips, longDuration, Math.max(0,21-shortTrips-highSpeedTrips-longDuration)],
+          backgroundColor:['rgba(255,204,0,0.8)','rgba(255,107,53,0.8)','rgba(255,59,92,0.8)','rgba(90,122,148,0.6)'], borderWidth:0}]},
+  options:{responsive:true, cutout:'55%', plugins:{legend:{position:'right', labels:{boxWidth:10}}}}
+});
+
+// Anomaly list
+const anomalyRules = [
+  {icon:'⚡', rule:'Ultra-Short Trip', desc:'Duration < 2 minutes — possible device error or abuse', sev:'high', filter: r=>r.duration_sec < 120},
+  {icon:'🚀', rule:'Unrealistic Speed', desc:'Speed > 40 km/h — GPS mismatch or device reuse across accounts', sev:'high', filter: r=>r.duration_sec>0 && (r.distance_km/(r.duration_sec/3600))>40},
+  {icon:'⏱', rule:'Excessive Duration', desc:'Trip duration > 5 hours — possible bike abandonment or theft', sev:'med', filter: r=>r.duration_sec>18000},
+  {icon:'🔋', rule:'Already Flagged by System', desc:'Marked is_flagged=true in source data', sev:'high', filter: r=>r.is_flagged},
+];
+const listEl = document.getElementById('anomalyList');
+anomalyRules.forEach(rule => {
+  const hits = DATA.rentals.filter(rule.filter);
+  if (!hits.length) return;
+  hits.slice(0,3).forEach(r => {
+    const spd = r.duration_sec > 0 ? (r.distance_km/(r.duration_sec/3600)).toFixed(1) : 'N/A';
+    listEl.innerHTML += `<div class="anomaly-item">
+      <div class="anomaly-icon">${rule.icon}</div>
+      <div style="flex:1">
+        <div class="anomaly-title" style="display:flex;align-items:center;gap:8px">
+          ${rule.rule} <span class="severity sev-${rule.sev}">${rule.sev.toUpperCase()}</span>
+        </div>
+        <div class="anomaly-meta">${rule.desc}</div>
+        <div class="stat-row" style="margin-top:6px">
+          <span class="stat-pill">${r.rental_id}</span>
+          <span class="stat-pill">${r.user_id}</span>
+          <span class="stat-pill">${r.bike_id}</span>
+          <span class="stat-pill">${fmtDur(r.duration_sec)}</span>
+          <span class="stat-pill">${r.distance_km} km</span>
+          <span class="stat-pill">${spd} km/h</span>
+          <span class="stat-pill tag-${r.channel}">${r.channel}</span>
+        </div>
+      </div>
+    </div>`;
+  });
+});
+
+// ══ STATIONS ══════════════════════════════════
+const stnUsage = {};
+DATA.rentals.forEach(r => stnUsage[r.start_station_id] = (stnUsage[r.start_station_id]||0)+1);
+const topStns = Object.entries(stnUsage).sort((a,b)=>b[1]-a[1]).slice(0,10);
+const stnMap = {};
+DATA.stations.forEach(s => stnMap[s.station_id] = s.station_name);
+
+new Chart(document.getElementById('stationBarChart'), {
+  type:'bar',
+  data:{labels: topStns.map(([id])=> stnMap[id]||id), datasets:[{
+    label:'Rentals', data:topStns.map(([,c])=>c),
+    backgroundColor:'rgba(0,229,255,0.65)', borderRadius:4}]},
+  options:{indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{grid:{color:'rgba(30,45,61,0.8)'}}, y:{grid:{display:false}}}}
+});
+
+function renderStationTable(data) {
+  const tbody = document.getElementById('stationTableBody');
+  tbody.innerHTML = data.map(s => `<tr>
+    <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">${s.station_id}</td>
+    <td style="font-size:13px">${s.station_name}</td>
+    <td style="font-size:12px;color:var(--muted)">${s.neighborhood||'—'}</td>
+    <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent4)">${s.city_zone}</td>
+    <td style="font-family:var(--font-mono);font-size:12px">${s.capacity}</td>
+    <td><span class="tag ${s.status==='active'?'tag-ok':'tag-flagged'}">${s.status==='active'?'✓ Active':'✗ Inactive'}</span></td>
+    <td style="font-size:12px">${s.install_date||'—'}</td>
+    <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent3)">${stnUsage[s.station_id]||0}</td>
+  </tr>`).join('');
+}
+function filterStationTable() {
+  const z = document.getElementById('filterZone').value;
+  const st = document.getElementById('filterStnStatus').value;
+  renderStationTable(DATA.stations.filter(s=>(!z||s.city_zone===z)&&(!st||s.status===st)));
+}
+renderStationTable(DATA.stations);
+</script>
+</body>
+</html>

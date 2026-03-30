@@ -1,0 +1,21 @@
+station_id,station_name,latitude,longitude,capacity,neighborhood,city_zone,install_date,status
+STN0101,Downtown Station 101,12.97053,77.603809,15,Midtown,Z1,2024-03-21,active
+STN0102,Downtown Station 102,12.981735,77.600212,10,Midtown,Z1,2024-02-18,active
+STN0103,Downtown Station 103,12.975972,77.584931,20,Midtown,Z1,2026-01-05,active
+STN0104,West Station 104,13.006135,77.538707,15,Rajajinagar,Z5,2025-02-02,active
+STN0105,West Station 105,12.993865,77.549169,10,Vijayanagar,Z5,2024-06-26,active
+STN0106,Downtown Station 106,12.974435,77.61046,15,Old City,Z1,2025-08-06,active
+STN0107,North Station 107,12.994721,77.63705,10,Whitefield,Z2,2025-01-12,active
+STN0108,South Station 108,12.932623,77.583712,20,Jayanagar,Z3,2024-07-07,active
+STN0109,South Station 109,12.92118,77.585972,20,Bannerghatta Road,Z3,2024-04-17,active
+STN0110,South Station 110,12.902438,77.577044,10,JP Nagar,Z3,2026-01-31,active
+STN0111,South Station 111,12.924886,77.592153,15,Jayanagar,Z3,2024-08-25,active
+STN0112,West Station 112,13.006774,77.531497,15,Vijayanagar,Z5,2026-01-21,active
+STN0113,West Station 113,12.981654,77.553007,15,Vijayanagar,Z5,2024-05-14,active
+STN0114,North Station 114,13.019026,77.632583,15,Koramangala,Z2,2025-08-11,active
+STN0115,East Station 115,12.966647,77.688235,15,Sarjapur,Z4,2024-11-25,active
+STN0049,East Station 49,12.960116,77.693129,20,Sarjapur,Z4,2022-02-17,under_maintenance
+STN0041,Downtown Station 41,12.961285,77.59094,10,Financial District,Z1,2021-04-02,under_maintenance
+STN0089,East Station 89,12.945975,77.710268,20,Sarjapur,Z4,2023-01-23,under_maintenance
+STN0082,North Station 82,13.027439,77.634116,30,Koramangala,Z2,2021-04-24,under_maintenance
+STN0002,North Station 2,12.995676,77.638901,25,Koramangala,Z2,2023-04-28,under_maintenance
