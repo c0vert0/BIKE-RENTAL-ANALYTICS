@@ -1,6 +1,6 @@
 CREATE OR REPLACE DATABASE HACKATHON_BIKE_RIDES;
 CREATE SCHEMA RAW_SCHEMA;
-USE HACKATHON_BIKE_RIDES;
+USE DATABASE HACKATHON_BIKE_RIDES;
 USE SCHEMA RAW_SCHEMA;
 --csv format
 create or replace file format csv_format type=csv 
@@ -12,7 +12,7 @@ TYPE = 'JSON'
 STRIP_OUTER_ARRAY = TRUE;
 --stations table 
 CREATE OR REPLACE TABLE STATIONS (
-    station_id        STRING ,
+    station_id        STRING PRIMARY KEY,
     station_name      STRING,
     latitude          STRING,
     longitude         STRING,
@@ -20,10 +20,13 @@ CREATE OR REPLACE TABLE STATIONS (
     neighborhood      STRING,
     city_zone         STRING,
     install_date      STRING,
-    status            STRING
+    status            STRING,
+    _metadata_filename STRING,
+    _metadata_file_row_number NUMBER,
+    _load_timestamp TIMESTAMP_LTZ
 );
 CREATE OR REPLACE TABLE BIKES (
-    bike_id STRING PRIMARY KEY ,
+    bike_id STRING,
     bike_type         STRING,
     status            STRING,
     purchase_date     STRING,
@@ -36,7 +39,7 @@ CREATE OR REPLACE TABLE BIKES (
     _load_timestamp TIMESTAMP_LTZ
 );
 CREATE OR REPLACE TABLE USERS_TABLE (
-    user_id STRING PRIMARY KEY,
+    user_id STRING,
     customer_name STRING,
     dob STRING, 
     gender STRING,
@@ -54,7 +57,27 @@ CREATE OR REPLACE TABLE USERS_TABLE (
     _metadata_file_row_number NUMBER,
     _load_timestamp TIMESTAMP_LTZ
 );
-SHOW TABLES;
+CREATE OR REPLACE TABLE RAW_RENTALS (
+    rental_id STRING,
+    user_id STRING,
+    bike_id STRING,
+    start_station_id STRING,
+    end_station_id STRING,
+    start_time STRING,
+    end_time STRING,
+    duration_sec STRING,
+    distance_km STRING,
+    price STRING,
+    plan_type STRING,
+    channel STRING,
+    device_info STRING,
+    start_gps STRING,
+    end_gps STRING,
+    is_flagged STRING,
+    _metadata_filename STRING,
+    _metadata_file_row_number NUMBER,
+    _load_timestamp TIMESTAMP_LTZ
+);
 
 create or replace storage integration int1
     type = external_stage
@@ -80,15 +103,17 @@ AS
 COPY INTO STATIONS
 FROM (
     SELECT 
-        $1, $2, $3, $4, $5, $6, $7, $8, $9
+        $1, $2, $3, $4, $5, $6, $7, $8, $9,
+        METADATA$FILENAME,
+        METADATA$FILE_ROW_NUMBER,
+        CURRENT_TIMESTAMP()
     FROM @s1/Stations/
 )
-FILE_FORMAT = (FORMAT_NAME = 'HACKATHON_BIKE_RIDES.RAW_SCHEMA.CSV_FORMAT');
+FILE_FORMAT = (FORMAT_NAME = 'HACKATHON_BIKE_RIDES.RAW_SCHEMA.CSV_FORMAT')
+ON_ERROR = 'CONTINUE'
+PATTERN = '.*\.csv';;
 
 show pipes;
-
-
-select system$pipe_status('RENTALS_PIPE');
 
 -- Pipe for BIKES table
 CREATE OR REPLACE PIPE BIKES_PIPE
@@ -99,11 +124,13 @@ FROM (
     SELECT 
         $1, $2, $3, $4, $5, $6, $7, $8,
         METADATA$FILENAME AS _metadata_filename,
-        METADATA$FILE_ROW_NUMBER AS _metadata_file_row_number,
+        METADATA$FILE_ROW_NUMBER AS         _metadata_file_row_number,
         CURRENT_TIMESTAMP() AS _load_timestamp
     FROM @HACKATHON_BIKE_RIDES.RAW_SCHEMA.S1/Bikes/
 )
-FILE_FORMAT = (FORMAT_NAME = 'HACKATHON_BIKE_RIDES.RAW_SCHEMA.CSV_FORMAT');
+FILE_FORMAT = (FORMAT_NAME = 'HACKATHON_BIKE_RIDES.RAW_SCHEMA.CSV_FORMAT')
+ON_ERROR = 'CONTINUE'
+PATTERN = '.*\.csv';;
 
 -- Pipe for USERS_TABLE
 CREATE OR REPLACE PIPE HACKATHON_BIKE_RIDES.RAW_SCHEMA.USERS_PIPE
@@ -119,32 +146,28 @@ FROM (
     FROM @s1/Users/
 )
 FILE_FORMAT = (FORMAT_NAME = 'HACKATHON_BIKE_RIDES.RAW_SCHEMA.CSV_FORMAT');
+--Rentals PIPE
+CREATE OR REPLACE PIPE RENTALS_PIPE
+AUTO_INGEST = TRUE
+AS
+COPY INTO RAW_RENTALS
+FROM (
+    SELECT 
+        $1, $2, $3, $4, $5, $6, $7, $8,
+        $9, $10, $11, $12, $13, $14, $15, $16,
+        METADATA$FILENAME,
+        METADATA$FILE_ROW_NUMBER,
+        CURRENT_TIMESTAMP()
+    FROM @S1/Rentals/
+)
+FILE_FORMAT = (FORMAT_NAME = CSV_FORMAT)
+ON_ERROR = 'CONTINUE'
+PATTERN = '.*\.csv';
+
 ALTER PIPE HACKATHON_BIKE_RIDES.RAW_SCHEMA.USERS_PIPE REFRESH;
 
 select * from users_table;
 SELECT SYSTEM$PIPE_STATUS('HACKATHON_BIKE_RIDES.RAW_SCHEMA.USERS_PIPE');
-
-CREATE OR REPLACE TABLE RENTALS (
-    rental_id STRING,
-    user_id STRING FOREIGN KEY,
-    bike_id STRING FOREIGN KEY,
-    start_station_id STRING FOREIGN KEY,
-    end_station_id STRING,
-    start_time STRING,
-    end_time STRING,
-    duration_sec STRING,
-    distance_km STRING,
-    price STRING,
-    plan_type STRING,
-    channel STRING,
-    device_info STRING,
-    start_gps STRING,
-    end_gps STRING,
-    is_flagged STRING,
-    _metadata_filename STRING,
-    _metadata_file_row_number NUMBER,
-    _load_timestamp TIMESTAMP_LTZ
-);
 
 -- Pipe for RENTALS table (CSV)
 CREATE OR REPLACE PIPE HACKATHON_BIKE_RIDES.RAW_SCHEMA.RENTALS_PIPE
@@ -166,7 +189,3 @@ SHOW PIPES;
 SHOW FILE FORMATS;
 
 SELECT * FROM RENTALS;
-
-SHOW TABLES;
-SELECT * FROM RENTALS;
-DROP TABLE VALIDATED_RENTALS;
