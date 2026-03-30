@@ -39,9 +39,10 @@ This project builds an end-to-end data pipeline and dashboard for analyzing bike
 ---
 
 ## 📸 Dashboard Preview
-<img width="1920" height="1080" alt="Screenshot (296)" src="https://github.com/user-attachments/assets/d6782923-619e-4744-8177-1aa16ddadd0f" />
+<img width="1920" height="788" alt="Screenshot (296)" src="https://github.com/user-attachments/assets/59cdcd14-40b4-4cc2-bc91-c35d2351fcad" />
+<img width="1920" height="806" alt="Screenshot (297)" src="https://github.com/user-attachments/assets/b617cb50-e3a4-4f5e-8d17-6fca4194ac54" />
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/bd800d32-1e7b-47b8-acea-4ddbd4d04841" />
+
 
 
 ---
