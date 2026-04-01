@@ -1,4 +1,4 @@
-# 🚀 Bike-Rentals Data Pipeline (Snowflake + AWS + Power BI)
+# 🚀 Bike-Rentals Data Pipeline (Snowflake + AWS + Insights Dashboard)
 
 ## 📌 Overview
 
