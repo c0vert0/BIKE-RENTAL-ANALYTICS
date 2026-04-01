@@ -1,74 +1,110 @@
-# 🚴 Bike Rental Analytics Project
+# 🚀 Bike-Rentals Data Pipeline (Snowflake + AWS + Power BI)
 
 ## 📌 Overview
 
-This project builds an end-to-end data pipeline and dashboard for analyzing bike rental operations, anomaly detection, and fleet health.
+This project builds an end-to-end data pipeline for processing insurance policy and claims data using Snowflake and AWS. The pipeline ingests raw CSV/JSON data, cleans and validates it, performs transformations, and generates analytical datasets for reporting.
 
 ---
 
-## ⚙️ Tech Stack
+## 🧱 Architecture
 
-* SQL (Data Cleaning, Validation, KPIs)
-* Power BI (Dashboard Visualization)
-
----
-
-## 📊 Features
-
-* Data Cleaning & Standardization
-* Deduplication using Window Functions
-* Data Quality Checks (DQ Status & Reason)
-* Anomaly Detection (Battery, Usage, GPS)
-* KPI Computation:
-
-  * Anomaly Score
-  * Station Availability
-  * Engagement Ratio
-  * Fleet Health Index
-  * Revenue Metrics
+```
+S3 (Raw Files)
+   ↓
+Snowflake Stage
+   ↓
+Snowpipe (Auto Ingestion)
+   ↓
+RAW Layer (No transformation)
+   ↓
+VALIDATED Layer (Cleaning & standardization)
+   ↓
+CURATED Layer (Business metrics)
+   ↓
+Insights Dashboard
+```
 
 ---
 
-## 📂 Project Structure
+## 🛠️ Tech Stack
 
-* `/sql` → All SQL scripts
-* `/data` → Sample datasets
-* `/powerbi` → Dashboard file
-* `/docs` → Screenshots & architecture
-
----
-
-## 📸 Dashboard Preview
-<img width="1920" height="788" alt="Screenshot (296)" src="https://github.com/user-attachments/assets/59cdcd14-40b4-4cc2-bc91-c35d2351fcad" />
-<img width="1920" height="806" alt="Screenshot (297)" src="https://github.com/user-attachments/assets/b617cb50-e3a4-4f5e-8d17-6fca4194ac54" />
-
-
-
+* Snowflake (Data Warehouse)
+* AWS S3 (Storage)
+* Snowpipe (Ingestion)
+* SQL (Transformation)
+* Snowflake BI (Visualization)
+* GitHub (Version Control)
 
 ---
 
-## 🚀 How to Run
+## 📂 Data Source
 
-1. Load datasets into database
-2. Run SQL scripts in order
-3. Open Power BI dashboard
-
----
-
-## 🧠 Key Learnings
-
-* Window Functions
-* Data Validation Pipelines
-* Data Modeling
-* KPI Design
-* Dashboarding
+* bikes_master.csv
+* rentals_master.csv
+* stations_master.csv
+* users_master.csv
 
 ---
 
-## 👤 Author
+## ⚙️ Key Features
 
-* BEGUMPETA ANJALI
-* KOLLAPU JAHNAVI
-* ASRAR HUSSAIN
-* YASHWANTH RAJU
-* DURGA HARIKA
+### 1. Automated Data Ingestion
+
+* Used Snowpipe for continuous loading
+* Handled both CSV and JSON formats
+
+### 2. Data Cleaning & Validation
+
+* Removed invalid records using TRY_TO_NUMBER / TRY_TO_DATE
+* Standardized categorical fields (e.g., status)
+* Identified null and inconsistent values
+
+### 3. Incremental Load Handling
+
+* Used MERGE logic to avoid duplicates
+* Processed incremental files efficiently
+
+### 4. Data Modeling
+
+* RAW → VALIDATED → CURATED layered architecture
+* Ensured separation of concerns
+
+### 5. Business Insights
+
+* Customer-level premium analysis
+* Claims vs policies correlation
+* Data quality reporting
+
+---
+
+## 📁 Repository Structure
+
+```
+/data
+/sql
+   ├── raw_tables.sql
+   ├── validated_layer.sql
+   ├── curated_layer.sql
+/dashboard
+/docs
+README.md
+```
+
+---
+
+## 👨‍💻 My Contribution
+
+* Built data cleaning logic using Snowflake SQL
+* Designed layered data architecture
+* Implemented transformation queries
+* Contributed to data validation and reporting
+
+---
+
+## 🚀 Future Improvements
+
+* Add real-time streaming ingestion
+* Implement data quality monitoring dashboards
+* Optimize query performance
+
+---
